@@ -1,0 +1,30 @@
+import os
+
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.sql import ExecuteStatementRequestOnWaitTimeout, StatementState
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+
+@app.get("/")
+def index():
+    return "SHIFDE Databricks application"
+
+
+@app.get("/health")
+def health():
+    # The app runtime identity performs this bounded check, not the deployment principal.
+    try:
+        result = WorkspaceClient().statement_execution.execute_statement(
+            warehouse_id=os.environ["DATABRICKS_WAREHOUSE_ID"],
+            statement="SELECT 1", wait_timeout="10s", on_wait_timeout=ExecuteStatementRequestOnWaitTimeout.CANCEL,
+        )
+        passed = result.status is not None and result.status.state == StatementState.SUCCEEDED
+        return jsonify(status="ok" if passed else "failed", warehouse="ok" if passed else "failed"), 200 if passed else 503
+    except Exception:
+        return jsonify(status="failed", warehouse="failed"), 503
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("DATABRICKS_APP_PORT", "8000")))

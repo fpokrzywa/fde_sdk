@@ -1,0 +1,34 @@
+name: SDK foundation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.11.15"
+          python-version: "3.12"
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "24"
+      - run: npm install --global pnpm@10.33.0
+      - run: uv sync --frozen
+      - run: pnpm install --frozen-lockfile
+      - run: uv run pytest -q
+      - run: uv run ruff check packages tools tests examples
+      - run: uv run ruff format --check packages tools tests examples
+      - run: uv run mypy packages tools examples --no-error-summary
+      - run: uv build --all-packages --wheel --out-dir .tools/dist --link-mode copy
+      - run: pnpm test
+      - run: pnpm typecheck
+      - run: pnpm --filter @shifde/sdk build
+      - run: pnpm typecheck:examples
+      - run: uv run python tools/export_contracts.py
+      - run: pnpm generate
+      - run: git diff --exit-code -- schemas packages/sdk_typescript/src/generated

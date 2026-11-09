@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "DatabricksApplicationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "app_resource_key": {
+          "default": "app",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "title": "App Resource Key",
+          "type": "string"
+        },
+        "bundle_root": {
+          "default": ".",
+          "title": "Bundle Root",
+          "type": "string"
+        },
+        "bundle_target": {
+          "default": "dev",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Bundle Target",
+          "type": "string"
+        },
+        "health_path": {
+          "const": "/health",
+          "default": "/health",
+          "title": "Health Path",
+          "type": "string"
+        },
+        "kind": {
+          "const": "databricks.app/v1",
+          "default": "databricks.app/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "warehouse_binding": {
+          "default": "warehouse",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Warehouse Binding",
+          "type": "string"
+        }
+      },
+      "title": "DatabricksApplicationSpec",
+      "type": "object"
+    },
+    "FabricApplicationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Bindings",
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/FabricItem"
+          },
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "kind": {
+          "const": "fabric.solution/v1",
+          "default": "fabric.solution/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "solution_root": {
+          "default": ".",
+          "title": "Solution Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "FabricApplicationSpec",
+      "type": "object"
+    },
+    "FabricItem": {
+      "additionalProperties": false,
+      "properties": {
+        "definition_path": {
+          "title": "Definition Path",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "item_type": {
+          "enum": [
+            "Lakehouse",
+            "Notebook"
+          ],
+          "title": "Item Type",
+          "type": "string"
+        },
+        "key": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "item_type",
+        "definition_path"
+      ],
+      "title": "FabricItem",
+      "type": "object"
+    },
+    "FoundryApplicationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "frontend_path": {
+          "default": "frontend",
+          "title": "Frontend Path",
+          "type": "string"
+        },
+        "kind": {
+          "const": "palantir.superrepo/v1",
+          "default": "palantir.superrepo/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "ontology_binding": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Ontology Binding",
+          "type": "string"
+        },
+        "osdk_package": {
+          "title": "Osdk Package",
+          "type": "string"
+        },
+        "product_binding": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Product Binding",
+          "type": "string"
+        },
+        "superrepo_root": {
+          "default": ".",
+          "title": "Superrepo Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ontology_binding",
+        "osdk_package",
+        "product_binding"
+      ],
+      "title": "FoundryApplicationSpec",
+      "type": "object"
+    },
+    "SnowflakeApplicationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "application_binding": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Application Binding",
+          "type": "string"
+        },
+        "kind": {
+          "const": "snowflake.native-app/v1",
+          "default": "snowflake.native-app/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "package_binding": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Package Binding",
+          "type": "string"
+        },
+        "project_root": {
+          "default": ".",
+          "title": "Project Root",
+          "type": "string"
+        },
+        "release_patch": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Release Patch",
+          "type": "integer"
+        },
+        "release_version": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "title": "Release Version",
+          "type": "string"
+        },
+        "warehouse_binding": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Warehouse Binding",
+          "type": "string"
+        }
+      },
+      "required": [
+        "package_binding",
+        "application_binding",
+        "warehouse_binding",
+        "release_version"
+      ],
+      "title": "SnowflakeApplicationSpec",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
+      "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+      "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
+      "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/DatabricksApplicationSpec"
+    },
+    {
+      "$ref": "#/$defs/FoundryApplicationSpec"
+    },
+    {
+      "$ref": "#/$defs/SnowflakeApplicationSpec"
+    },
+    {
+      "$ref": "#/$defs/FabricApplicationSpec"
+    }
+  ]
+}

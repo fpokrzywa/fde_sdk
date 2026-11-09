@@ -1,0 +1,18 @@
+{
+  "version": "0.1.0",
+  "contractVersion": "1",
+  "adapters": {
+    "databricks.app/v1": {
+      "adapterVersion": "0.1.0",
+      "templateVersion": "0.1.0",
+      "maturity": "experimental",
+      "liveValidated": false,
+      "databricksSdk": "0.163.0",
+      "databricksCli": "1.25.0",
+      "windowsAmd64ArchiveSha256": "2f2555cb9a82ce8f892ac77d47d68f03c8ace405ff3d5d41d4b4bf5588f8f79e",
+      "releaseUrl": "https://github.com/databricks/cli/releases/tag/v1.25.0",
+      "packaging": "validated-source-archive"
+    }
+  },
+  "schemaOnlyKinds": ["palantir.superrepo/v1", "snowflake.native-app/v1", "fabric.solution/v1"]
+}

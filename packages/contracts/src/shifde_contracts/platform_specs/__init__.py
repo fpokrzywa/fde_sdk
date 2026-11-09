@@ -1,0 +1,1 @@
+"""Independent native application schemas."""

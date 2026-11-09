@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {"@shifde/sdk": ["../packages/sdk_typescript/src/index.ts"]}
+  },
+  "include": ["agent-native-app.ts"]
+}
