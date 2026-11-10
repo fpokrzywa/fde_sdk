@@ -1,0 +1,3705 @@
+{
+  "components": {
+    "schemas": {
+      "Application": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "name",
+          "kind"
+        ],
+        "title": "Application",
+        "type": "object"
+      },
+      "ApplicationSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "databricks.app/v1",
+              "palantir.superrepo/v1",
+              "snowflake.native-app/v1",
+              "fabric.solution/v1"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "ApplicationSubmission",
+        "type": "object"
+      },
+      "BuildArtifact": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_version": {
+            "title": "Adapter Version",
+            "type": "string"
+          },
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "archive": {
+            "$ref": "#/components/schemas/SourceArchive"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Digest",
+            "type": "string"
+          },
+          "spec": {
+            "discriminator": {
+              "mapping": {
+                "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Output",
+                "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Output",
+                "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Output",
+                "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Output"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabricksApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FoundryApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FabricApplicationSpec-Output"
+              }
+            ],
+            "title": "Spec"
+          },
+          "spec_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Spec Digest",
+            "type": "string"
+          },
+          "template_version": {
+            "default": "0.1.0",
+            "title": "Template Version",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "toolchain_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Toolchain Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "application_id",
+          "archive",
+          "source_digest",
+          "spec_digest",
+          "spec",
+          "adapter_version",
+          "toolchain_digest",
+          "template_version"
+        ],
+        "title": "BuildArtifact",
+        "type": "object"
+      },
+      "BuildResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "build",
+            "default": "build",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/BuildArtifact"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "BuildResult",
+        "type": "object"
+      },
+      "BuildSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "BuildSubmission",
+        "type": "object"
+      },
+      "Capability": {
+        "additionalProperties": false,
+        "properties": {
+          "operation": {
+            "title": "Operation",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "supported",
+              "unsupported",
+              "unknown"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "status",
+          "reason"
+        ],
+        "title": "Capability",
+        "type": "object"
+      },
+      "CapabilityReport": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_version": {
+            "title": "Adapter Version",
+            "type": "string"
+          },
+          "application_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Application Kinds",
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/Capability"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "captured_at": {
+            "format": "date-time",
+            "title": "Captured At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "maturity": {
+            "default": "experimental",
+            "enum": [
+              "experimental",
+              "supported"
+            ],
+            "title": "Maturity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "adapter_version",
+          "maturity",
+          "application_kinds",
+          "capabilities",
+          "captured_at",
+          "expires_at"
+        ],
+        "title": "CapabilityReport",
+        "type": "object"
+      },
+      "Connection": {
+        "additionalProperties": false,
+        "properties": {
+          "credential_ref": {
+            "title": "Credential Ref",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "revision": {
+            "default": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "name",
+          "host",
+          "credential_ref",
+          "revision"
+        ],
+        "title": "Connection",
+        "type": "object"
+      },
+      "ConnectionSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "credential_ref": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Credential Ref",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "host",
+          "credential_ref"
+        ],
+        "title": "ConnectionSubmission",
+        "type": "object"
+      },
+      "DatabricksApplicationSpec-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "app_resource_key": {
+            "default": "app",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "title": "App Resource Key",
+            "type": "string"
+          },
+          "bundle_root": {
+            "default": ".",
+            "title": "Bundle Root",
+            "type": "string"
+          },
+          "bundle_target": {
+            "default": "dev",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Bundle Target",
+            "type": "string"
+          },
+          "health_path": {
+            "const": "/health",
+            "default": "/health",
+            "title": "Health Path",
+            "type": "string"
+          },
+          "kind": {
+            "const": "databricks.app/v1",
+            "default": "databricks.app/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "warehouse_binding": {
+            "default": "warehouse",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Warehouse Binding",
+            "type": "string"
+          }
+        },
+        "title": "DatabricksApplicationSpec",
+        "type": "object"
+      },
+      "DatabricksApplicationSpec-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "app_resource_key": {
+            "default": "app",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "title": "App Resource Key",
+            "type": "string"
+          },
+          "bundle_root": {
+            "default": ".",
+            "title": "Bundle Root",
+            "type": "string"
+          },
+          "bundle_target": {
+            "default": "dev",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Bundle Target",
+            "type": "string"
+          },
+          "health_path": {
+            "const": "/health",
+            "default": "/health",
+            "title": "Health Path",
+            "type": "string"
+          },
+          "kind": {
+            "const": "databricks.app/v1",
+            "default": "databricks.app/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "warehouse_binding": {
+            "default": "warehouse",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Warehouse Binding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "bundle_target",
+          "bundle_root",
+          "app_resource_key",
+          "warehouse_binding",
+          "health_path"
+        ],
+        "title": "DatabricksApplicationSpec",
+        "type": "object"
+      },
+      "Deployment": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "artifact_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Artifact Digest",
+            "type": "string"
+          },
+          "healthy": {
+            "title": "Healthy",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceBinding"
+            },
+            "title": "Resources",
+            "type": "array"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "application_id",
+          "target_id",
+          "artifact_digest",
+          "resources",
+          "healthy"
+        ],
+        "title": "Deployment",
+        "type": "object"
+      },
+      "DeploymentPlan": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_version": {
+            "title": "Adapter Version",
+            "type": "string"
+          },
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "artifact_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Artifact Digest",
+            "type": "string"
+          },
+          "artifact_id": {
+            "format": "uuid",
+            "title": "Artifact Id",
+            "type": "string"
+          },
+          "bindings_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Bindings Digest",
+            "type": "string"
+          },
+          "connection_revision": {
+            "title": "Connection Revision",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "title": "Details",
+            "type": "object"
+          },
+          "digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/EnvironmentSnapshot"
+          },
+          "spec_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Spec Digest",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/PlanStep"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "toolchain_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Toolchain Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "application_id",
+          "target_id",
+          "connection_revision",
+          "artifact_id",
+          "artifact_digest",
+          "spec_digest",
+          "bindings_digest",
+          "adapter_version",
+          "toolchain_digest",
+          "snapshot",
+          "steps",
+          "details",
+          "created_at",
+          "expires_at",
+          "digest"
+        ],
+        "title": "DeploymentPlan",
+        "type": "object"
+      },
+      "DeploymentResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "deployment",
+            "default": "deployment",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/Deployment"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "DeploymentResult",
+        "type": "object"
+      },
+      "DeploymentSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": {
+            "format": "uuid",
+            "title": "Artifact Id",
+            "type": "string"
+          },
+          "plan_id": {
+            "format": "uuid",
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id",
+          "artifact_id"
+        ],
+        "title": "DeploymentSubmission",
+        "type": "object"
+      },
+      "DeploymentView": {
+        "additionalProperties": false,
+        "properties": {
+          "deployment": {
+            "$ref": "#/components/schemas/Deployment"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/Operation"
+          }
+        },
+        "required": [
+          "deployment",
+          "operation"
+        ],
+        "title": "DeploymentView",
+        "type": "object"
+      },
+      "Diagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "path"
+        ],
+        "title": "Diagnostic",
+        "type": "object"
+      },
+      "EnvironmentSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "captured_at": {
+            "format": "date-time",
+            "title": "Captured At",
+            "type": "string"
+          },
+          "fingerprint": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Fingerprint",
+            "type": "string"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceBinding"
+            },
+            "title": "Resources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "resources",
+          "fingerprint",
+          "captured_at"
+        ],
+        "title": "EnvironmentSnapshot",
+        "type": "object"
+      },
+      "EventPage": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OperationEvent"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "next_cursor": {
+            "title": "Next Cursor",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "title": "EventPage",
+        "type": "object"
+      },
+      "FabricApplicationSpec-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FabricItem-Input"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "const": "fabric.solution/v1",
+            "default": "fabric.solution/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "solution_root": {
+            "default": ".",
+            "title": "Solution Root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "FabricApplicationSpec",
+        "type": "object"
+      },
+      "FabricApplicationSpec-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FabricItem-Output"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "const": "fabric.solution/v1",
+            "default": "fabric.solution/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "solution_root": {
+            "default": ".",
+            "title": "Solution Root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "solution_root",
+          "items",
+          "bindings"
+        ],
+        "title": "FabricApplicationSpec",
+        "type": "object"
+      },
+      "FabricItem-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "definition_path": {
+            "title": "Definition Path",
+            "type": "string"
+          },
+          "depends_on": {
+            "items": {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            "title": "Depends On",
+            "type": "array"
+          },
+          "item_type": {
+            "enum": [
+              "Lakehouse",
+              "Notebook"
+            ],
+            "title": "Item Type",
+            "type": "string"
+          },
+          "key": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "item_type",
+          "definition_path"
+        ],
+        "title": "FabricItem",
+        "type": "object"
+      },
+      "FabricItem-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "definition_path": {
+            "title": "Definition Path",
+            "type": "string"
+          },
+          "depends_on": {
+            "items": {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            "title": "Depends On",
+            "type": "array"
+          },
+          "item_type": {
+            "enum": [
+              "Lakehouse",
+              "Notebook"
+            ],
+            "title": "Item Type",
+            "type": "string"
+          },
+          "key": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "item_type",
+          "definition_path",
+          "depends_on"
+        ],
+        "title": "FabricItem",
+        "type": "object"
+      },
+      "FoundryApplicationSpec-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "frontend_path": {
+            "default": "frontend",
+            "title": "Frontend Path",
+            "type": "string"
+          },
+          "kind": {
+            "const": "palantir.superrepo/v1",
+            "default": "palantir.superrepo/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "ontology_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Ontology Binding",
+            "type": "string"
+          },
+          "osdk_package": {
+            "title": "Osdk Package",
+            "type": "string"
+          },
+          "product_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Product Binding",
+            "type": "string"
+          },
+          "superrepo_root": {
+            "default": ".",
+            "title": "Superrepo Root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ontology_binding",
+          "osdk_package",
+          "product_binding"
+        ],
+        "title": "FoundryApplicationSpec",
+        "type": "object"
+      },
+      "FoundryApplicationSpec-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "frontend_path": {
+            "default": "frontend",
+            "title": "Frontend Path",
+            "type": "string"
+          },
+          "kind": {
+            "const": "palantir.superrepo/v1",
+            "default": "palantir.superrepo/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "ontology_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Ontology Binding",
+            "type": "string"
+          },
+          "osdk_package": {
+            "title": "Osdk Package",
+            "type": "string"
+          },
+          "product_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Product Binding",
+            "type": "string"
+          },
+          "superrepo_root": {
+            "default": ".",
+            "title": "Superrepo Root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "superrepo_root",
+          "ontology_binding",
+          "osdk_package",
+          "frontend_path",
+          "product_binding"
+        ],
+        "title": "FoundryApplicationSpec",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "InspectionResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "inspection",
+            "default": "inspection",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/EnvironmentSnapshot"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "InspectionResult",
+        "type": "object"
+      },
+      "InspectionSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "application_id",
+          "target_id"
+        ],
+        "title": "InspectionSubmission",
+        "type": "object"
+      },
+      "JsonValue": {},
+      "Operation": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Diagnostic"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "operation_kind": {
+            "enum": [
+              "inspection",
+              "scaffold",
+              "validation",
+              "build",
+              "plan",
+              "deployment"
+            ],
+            "title": "Operation Kind",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "build": "#/components/schemas/BuildResult",
+                    "deployment": "#/components/schemas/DeploymentResult",
+                    "inspection": "#/components/schemas/InspectionResult",
+                    "plan": "#/components/schemas/PlanResult",
+                    "scaffold": "#/components/schemas/ScaffoldResult",
+                    "validation": "#/components/schemas/ValidationResult"
+                  },
+                  "propertyName": "result_kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BuildResult"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PlanResult"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DeploymentResult"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ScaffoldResult"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ValidationResult"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InspectionResult"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "state": {
+            "default": "queued",
+            "enum": [
+              "queued",
+              "running",
+              "waiting_for_policy",
+              "reconciling",
+              "needs_attention",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "operation_kind",
+          "state",
+          "created_at",
+          "result",
+          "error"
+        ],
+        "title": "Operation",
+        "type": "object"
+      },
+      "OperationControl": {
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "format": "uuid",
+            "title": "Operation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id"
+        ],
+        "title": "OperationControl",
+        "type": "object"
+      },
+      "OperationEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "title": "Data",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "name",
+          "data",
+          "created_at"
+        ],
+        "title": "OperationEvent",
+        "type": "object"
+      },
+      "PlanResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "plan",
+            "default": "plan",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DeploymentPlan"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "PlanResult",
+        "type": "object"
+      },
+      "PlanStep": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "create",
+              "update",
+              "start",
+              "delete",
+              "unknown"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "resource_key": {
+            "title": "Resource Key",
+            "type": "string"
+          },
+          "reversible": {
+            "default": false,
+            "title": "Reversible",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "action",
+          "resource_key",
+          "reversible"
+        ],
+        "title": "PlanStep",
+        "type": "object"
+      },
+      "PlanSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": {
+            "format": "uuid",
+            "title": "Artifact Id",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_id",
+          "target_id"
+        ],
+        "title": "PlanSubmission",
+        "type": "object"
+      },
+      "PolicyDecisionSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "title": "Approve",
+            "type": "boolean"
+          },
+          "operation_id": {
+            "format": "uuid",
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "plan_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Plan Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id",
+          "plan_digest",
+          "approve"
+        ],
+        "title": "PolicyDecisionSubmission",
+        "type": "object"
+      },
+      "Project": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "revision": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceArchive"
+          },
+          "spec": {
+            "discriminator": {
+              "mapping": {
+                "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Output",
+                "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Output",
+                "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Output",
+                "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Output"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabricksApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FoundryApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FabricApplicationSpec-Output"
+              }
+            ],
+            "title": "Spec"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "application_id",
+          "revision",
+          "spec",
+          "source"
+        ],
+        "title": "Project",
+        "type": "object"
+      },
+      "ProjectSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "spec": {
+            "discriminator": {
+              "mapping": {
+                "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Input",
+                "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Input",
+                "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Input",
+                "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Input"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabricksApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FoundryApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FabricApplicationSpec-Input"
+              }
+            ],
+            "title": "Spec"
+          }
+        },
+        "required": [
+          "application_id",
+          "source_id",
+          "spec"
+        ],
+        "title": "ProjectSubmission",
+        "type": "object"
+      },
+      "ResourceBinding": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "native_id": {
+            "title": "Native Id",
+            "type": "string"
+          },
+          "resource_type": {
+            "title": "Resource Type",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "native_id",
+          "resource_type",
+          "application_id",
+          "target_id"
+        ],
+        "title": "ResourceBinding",
+        "type": "object"
+      },
+      "ScaffoldResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "scaffold",
+            "default": "scaffold",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/SourceArchive"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "ScaffoldResult",
+        "type": "object"
+      },
+      "ScaffoldSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "spec": {
+            "discriminator": {
+              "mapping": {
+                "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Input",
+                "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Input",
+                "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Input",
+                "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Input"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabricksApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FoundryApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/SnowflakeApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FabricApplicationSpec-Input"
+              }
+            ],
+            "title": "Spec"
+          },
+          "template_version": {
+            "default": "0.1.0",
+            "title": "Template Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "application_id",
+          "spec"
+        ],
+        "title": "ScaffoldSubmission",
+        "type": "object"
+      },
+      "SnowflakeApplicationSpec-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "application_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Application Binding",
+            "type": "string"
+          },
+          "kind": {
+            "const": "snowflake.native-app/v1",
+            "default": "snowflake.native-app/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "package_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Package Binding",
+            "type": "string"
+          },
+          "project_root": {
+            "default": ".",
+            "title": "Project Root",
+            "type": "string"
+          },
+          "release_patch": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Release Patch",
+            "type": "integer"
+          },
+          "release_version": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "title": "Release Version",
+            "type": "string"
+          },
+          "warehouse_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Warehouse Binding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "package_binding",
+          "application_binding",
+          "warehouse_binding",
+          "release_version"
+        ],
+        "title": "SnowflakeApplicationSpec",
+        "type": "object"
+      },
+      "SnowflakeApplicationSpec-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "application_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Application Binding",
+            "type": "string"
+          },
+          "kind": {
+            "const": "snowflake.native-app/v1",
+            "default": "snowflake.native-app/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "package_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Package Binding",
+            "type": "string"
+          },
+          "project_root": {
+            "default": ".",
+            "title": "Project Root",
+            "type": "string"
+          },
+          "release_patch": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Release Patch",
+            "type": "integer"
+          },
+          "release_version": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "title": "Release Version",
+            "type": "string"
+          },
+          "warehouse_binding": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Warehouse Binding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "project_root",
+          "package_binding",
+          "application_binding",
+          "warehouse_binding",
+          "release_version",
+          "release_patch"
+        ],
+        "title": "SnowflakeApplicationSpec",
+        "type": "object"
+      },
+      "SourceArchive": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "format": {
+            "default": "zip",
+            "title": "Format",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0.0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "digest",
+          "format",
+          "size"
+        ],
+        "title": "SourceArchive",
+        "type": "object"
+      },
+      "SourceUpload": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceArchive"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "digest",
+          "size",
+          "expires_at",
+          "source"
+        ],
+        "title": "SourceUpload",
+        "type": "object"
+      },
+      "SourceUploadCompletion": {
+        "additionalProperties": false,
+        "properties": {
+          "upload_id": {
+            "format": "uuid",
+            "title": "Upload Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id"
+        ],
+        "title": "SourceUploadCompletion",
+        "type": "object"
+      },
+      "SourceUploadSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "size": {
+            "maximum": 20971520.0,
+            "minimum": 1.0,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "digest",
+          "size"
+        ],
+        "title": "SourceUploadSubmission",
+        "type": "object"
+      },
+      "Target": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "object"
+          },
+          "connection_id": {
+            "format": "uuid",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "connection_revision": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Connection Revision",
+            "type": "integer"
+          },
+          "environment": {
+            "default": "dev",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Environment",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "connection_id",
+          "connection_revision",
+          "environment",
+          "host",
+          "bindings"
+        ],
+        "title": "Target",
+        "type": "object"
+      },
+      "TargetPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "maxProperties": 50,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bindings"
+          },
+          "environment": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment"
+          }
+        },
+        "title": "TargetPatch",
+        "type": "object"
+      },
+      "TargetSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "maxProperties": 50,
+            "title": "Bindings",
+            "type": "object"
+          },
+          "connection_id": {
+            "format": "uuid",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "environment": {
+            "default": "dev",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Environment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id"
+        ],
+        "title": "TargetSubmission",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "ValidationReport": {
+        "additionalProperties": false,
+        "properties": {
+          "diagnostics": {
+            "items": {
+              "$ref": "#/components/schemas/Diagnostic"
+            },
+            "title": "Diagnostics",
+            "type": "array"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "passed",
+          "diagnostics"
+        ],
+        "title": "ValidationReport",
+        "type": "object"
+      },
+      "ValidationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "result_kind": {
+            "const": "validation",
+            "default": "validation",
+            "title": "Result Kind",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ValidationReport"
+          }
+        },
+        "required": [
+          "result_kind",
+          "value"
+        ],
+        "title": "ValidationResult",
+        "type": "object"
+      },
+      "ValidationSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "ValidationSubmission",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "SHIFDE application delivery",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "health_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          }
+        },
+        "summary": "Ready"
+      }
+    },
+    "/v1/applications": {
+      "post": {
+        "operationId": "create_application_v1_applications_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Application"
+      }
+    },
+    "/v1/applications/{identity}": {
+      "get": {
+        "operationId": "get_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/artifacts/{identity}": {
+      "get": {
+        "operationId": "get_artifact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildArtifact"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/builds": {
+      "post": {
+        "operationId": "builds_v1_builds_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Builds"
+      }
+    },
+    "/v1/connections": {
+      "post": {
+        "operationId": "create_connection_v1_connections_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Connection"
+      }
+    },
+    "/v1/connections/{identity}": {
+      "get": {
+        "operationId": "get_connection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/deployments": {
+      "post": {
+        "operationId": "deployments_v1_deployments_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeploymentSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deployments"
+      }
+    },
+    "/v1/deployments/{identity}": {
+      "get": {
+        "operationId": "deployment_v1_deployments__identity__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deployment"
+      }
+    },
+    "/v1/inspections": {
+      "post": {
+        "operationId": "inspections_v1_inspections_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspectionSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inspections"
+      }
+    },
+    "/v1/operation-cancellations": {
+      "post": {
+        "operationId": "cancel_v1_operation_cancellations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationControl"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel"
+      }
+    },
+    "/v1/operation-resumptions": {
+      "post": {
+        "operationId": "resume_v1_operation_resumptions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationControl"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resume"
+      }
+    },
+    "/v1/operations/{identity}": {
+      "get": {
+        "operationId": "operation_v1_operations__identity__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Operation"
+      }
+    },
+    "/v1/operations/{identity}/events": {
+      "get": {
+        "operationId": "events_v1_operations__identity__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Events"
+      }
+    },
+    "/v1/plans": {
+      "post": {
+        "operationId": "plans_v1_plans_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Plans"
+      }
+    },
+    "/v1/plans/{identity}": {
+      "get": {
+        "operationId": "get_plan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentPlan"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/platform-schemas/{platform}": {
+      "get": {
+        "operationId": "platform_schema_v1_platform_schemas__platform__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "platform",
+            "required": true,
+            "schema": {
+              "title": "Platform",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Platform Schema"
+      }
+    },
+    "/v1/policy-decisions": {
+      "post": {
+        "operationId": "decide_policy_v1_policy_decisions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyDecisionSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Policy"
+      }
+    },
+    "/v1/projects": {
+      "post": {
+        "operationId": "create_project_v1_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Project"
+      }
+    },
+    "/v1/projects/{identity}": {
+      "get": {
+        "operationId": "get_project",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/scaffolds": {
+      "post": {
+        "operationId": "scaffolds_v1_scaffolds_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScaffoldSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scaffolds"
+      }
+    },
+    "/v1/source-upload-completions": {
+      "post": {
+        "operationId": "complete_upload_v1_source_upload_completions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceUploadCompletion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceArchive"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Upload"
+      }
+    },
+    "/v1/source-uploads": {
+      "post": {
+        "operationId": "create_upload_v1_source_uploads_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceUploadSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceUpload"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Upload"
+      }
+    },
+    "/v1/source-uploads/{identity}/content": {
+      "put": {
+        "operationId": "upload_content_v1_source_uploads__identity__content_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Content"
+      }
+    },
+    "/v1/sources/{identity}": {
+      "get": {
+        "operationId": "get_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceArchive"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      }
+    },
+    "/v1/sources/{identity}/content": {
+      "get": {
+        "operationId": "source_content_v1_sources__identity__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Source Content"
+      }
+    },
+    "/v1/targets": {
+      "post": {
+        "operationId": "create_target_v1_targets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Target"
+      }
+    },
+    "/v1/targets/{identity}": {
+      "get": {
+        "operationId": "get_target",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get"
+      },
+      "patch": {
+        "operationId": "patch_target_v1_targets__identity__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-match",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patch Target"
+      }
+    },
+    "/v1/targets/{identity}/capabilities": {
+      "get": {
+        "operationId": "capabilities_v1_targets__identity__capabilities_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapabilityReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Capabilities"
+      }
+    },
+    "/v1/validations": {
+      "post": {
+        "operationId": "validations_v1_validations_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Validations"
+      }
+    }
+  }
+}

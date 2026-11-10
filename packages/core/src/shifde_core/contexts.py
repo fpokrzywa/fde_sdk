@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -5,14 +6,14 @@ from uuid import UUID, uuid4
 
 from shifde_contracts.common import ResourceBinding, Target, utcnow
 
-from shifde_core.artifact_store import LocalArtifactStore
-from shifde_core.journal import StepJournal
+from shifde_core.artifact_store import ArtifactStore
+from shifde_core.journal import Journal
 
 
 @dataclass(frozen=True, kw_only=True)
 class BuildContext:
     tenant_id: UUID
-    artifacts: LocalArtifactStore
+    artifacts: ArtifactStore
     toolchain_digest: str
     workspace: Path
     operation_id: UUID = field(default_factory=uuid4)
@@ -37,9 +38,15 @@ class ReadContext:
 
 @dataclass(frozen=True, kw_only=True)
 class DeployContext(ReadContext):
-    artifacts: LocalArtifactStore
-    journal: StepJournal
+    artifacts: ArtifactStore
+    journal: Journal
     toolchain_digest: str
+    write_guard: Callable[[], None] | None = None
+
+    def check_deadline(self):
+        super().check_deadline()
+        if self.write_guard:
+            self.write_guard()
 
     def __post_init__(self):
         super().__post_init__()

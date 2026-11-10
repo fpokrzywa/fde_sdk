@@ -1,4 +1,4 @@
-name: SDK foundation
+name: SDK and hosted delivery
 on: [push, pull_request]
 permissions:
   contents: read
@@ -20,15 +20,41 @@ jobs:
       - run: npm install --global pnpm@10.33.0
       - run: uv sync --frozen
       - run: pnpm install --frozen-lockfile
-      - run: uv run pytest -q
-      - run: uv run ruff check packages tools tests examples
-      - run: uv run ruff format --check packages tools tests examples
-      - run: uv run mypy packages tools examples --no-error-summary
+      - run: uv run pytest -q -m "not integration"
+      - run: uv run ruff check packages apps tools tests examples
+      - run: uv run ruff format --check packages apps tools tests examples
+      - run: uv run mypy packages apps tools examples --no-error-summary
       - run: uv build --all-packages --wheel --out-dir .tools/dist --link-mode copy
       - run: pnpm test
       - run: pnpm typecheck
       - run: pnpm --filter @shifde/sdk build
       - run: pnpm typecheck:examples
       - run: uv run python tools/export_contracts.py
+      - run: uv run python tools/export_openapi.py
       - run: pnpm generate
       - run: git diff --exit-code -- schemas packages/sdk_typescript/src/generated
+  hosted:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.10
+        env:
+          POSTGRES_PASSWORD: integration-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      SHIFDE_TEST_ADMIN_URL: postgresql+psycopg://postgres:integration-only@127.0.0.1:5432/postgres
+      SHIFDE_TEST_TEMPORAL_ADDRESS: 127.0.0.1:7233
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.11.15"
+          python-version: "3.12"
+      - run: uv sync --frozen
+      - run: docker run -d --name temporal -p 127.0.0.1:7233:7233 temporalio/temporal:1.10.0 server start-dev --ip 0.0.0.0 --headless
+      - run: uv run python tools/wait_for_temporal.py
+      - run: uv run pytest tests/hosted -q

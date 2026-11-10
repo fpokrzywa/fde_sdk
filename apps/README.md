@@ -1,3 +1,3 @@
 # Hosted service boundaries
 
-The planned API, Temporal control worker, MCP facade and CLI belong here. They are not part of the first local SDK increment. Reuse `PlatformAdapter`, the canonical contracts and shared planning policy when implementing those services; do not expose local filesystem state as a multi-tenant API.
+`api` exposes FastAPI `/v1` endpoints; `control_worker` runs Temporal coordination, execution activities and the PostgreSQL outbox dispatcher; `mcp` exposes the same application service through authenticated Streamable HTTP or an explicit caller-token stdio bridge. See [hosted development](../docs/hosted-development.md) for configuration and commands.

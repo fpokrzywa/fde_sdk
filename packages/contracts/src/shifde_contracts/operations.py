@@ -3,9 +3,17 @@ from typing import Annotated, Literal
 from pydantic import Field, JsonValue
 
 from shifde_contracts.builds import BuildArtifact
-from shifde_contracts.common import Diagnostic, Entity, Model, Timestamp, utcnow
+from shifde_contracts.common import (
+    Diagnostic,
+    Entity,
+    Model,
+    SourceArchive,
+    Timestamp,
+    ValidationReport,
+    utcnow,
+)
 from shifde_contracts.execution import Deployment
-from shifde_contracts.plans import DeploymentPlan
+from shifde_contracts.plans import DeploymentPlan, EnvironmentSnapshot
 
 OperationState = Literal[
     "queued",
@@ -34,8 +42,29 @@ class DeploymentResult(Model):
     value: Deployment
 
 
+class ScaffoldResult(Model):
+    result_kind: Literal["scaffold"] = "scaffold"
+    value: SourceArchive
+
+
+class ValidationResult(Model):
+    result_kind: Literal["validation"] = "validation"
+    value: ValidationReport
+
+
+class InspectionResult(Model):
+    result_kind: Literal["inspection"] = "inspection"
+    value: EnvironmentSnapshot
+
+
 OperationResult = Annotated[
-    BuildResult | PlanResult | DeploymentResult, Field(discriminator="result_kind")
+    BuildResult
+    | PlanResult
+    | DeploymentResult
+    | ScaffoldResult
+    | ValidationResult
+    | InspectionResult,
+    Field(discriminator="result_kind"),
 ]
 
 

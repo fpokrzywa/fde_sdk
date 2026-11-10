@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Protocol
 from uuid import UUID
 
 from filelock import FileLock
@@ -12,6 +13,16 @@ from shifde_core.hashing import canonical_bytes, digest
 
 class NeedsAttention(RuntimeError):
     pass
+
+
+class Journal(Protocol):
+    tenant_id: UUID
+    operation_id: UUID
+
+    def intent(self, key: str, inputs: dict) -> bool: ...
+    def complete(self, key: str, receipt: dict) -> None: ...
+    def completed(self, key: str) -> dict | None: ...
+    def has_intent(self, key: str) -> bool: ...
 
 
 class StepJournal:

@@ -1,10 +1,10 @@
 # SHIFDE Native Application SDK
 
-SHIFDE builds platform-specific applications through a shared delivery lifecycle. This first implementation provides canonical Python contracts, generated TypeScript contracts, HTTP SDK clients, a trusted local delivery service, and an experimental Databricks App adapter.
+SHIFDE builds platform-specific applications through a shared delivery lifecycle. It provides canonical contracts, Python and TypeScript HTTP clients, a hosted FastAPI service, PostgreSQL persistence, Temporal orchestration, authenticated MCP tools, a trusted local delivery service, and an experimental Databricks App adapter.
 
 The Databricks adapter scaffolds a Python app, packages immutable source, plans changes against native state, deploys a bounded app-only bundle, starts the app, and verifies native status plus an authenticated runtime warehouse check. Local steps and ownership survive process restarts. An uncertain native write stops execution for reconciliation.
 
-The hosted API, PostgreSQL/Temporal orchestration, isolated hosted/private executors and MCP server are subsequent increments. The HTTP SDKs target that API contract; this repository does not yet run that server. Palantir, Snowflake and Fabric have native specification models, not implemented deployment adapters. Local filesystem tenancy checks are not a hosted security boundary.
+Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server. Hosted execution currently uses a trusted worker for source-only Databricks App deployment. General isolated compilation and private executors remain subsequent increments. Palantir, Snowflake and Fabric have native specification models; their deployment adapters are not implemented.
 
 ## Install and verify
 
@@ -14,9 +14,9 @@ Use Python 3.12, uv, Node.js 24 or 26, and pnpm 10.33.0. Run from the repository
 uv sync --frozen
 pnpm install --frozen-lockfile
 uv run pytest -q
-uv run ruff check packages tools tests examples
-uv run ruff format --check packages tools tests examples
-uv run mypy packages tools examples --no-error-summary
+uv run ruff check packages apps tools tests examples
+uv run ruff format --check packages apps tools tests examples
+uv run mypy packages apps tools examples --no-error-summary
 uv build --all-packages --wheel --out-dir .tools/dist --link-mode copy
 pnpm test
 pnpm typecheck
@@ -40,11 +40,16 @@ packages/core/                  adapter protocol, artifacts, plans, policy and l
 packages/adapters/databricks/   real Databricks SDK/CLI integration and packaged app template
 packages/sdk_python/            validated async HTTP client
 packages/sdk_typescript/        generated types, runtime validation and async HTTP client
+packages/hosted/                PostgreSQL service, authorization, outbox, execution and journals
+apps/api/                      FastAPI HTTP entry point
+apps/control_worker/           Temporal workflows, activities, dispatcher and worker entry point
+apps/mcp/                      authenticated Streamable HTTP MCP and stdio HTTP bridge
 schemas/                       canonical exported JSON Schemas
 examples/                      local Databricks workflow and typed agent integration example
 tests/                         contracts, SDKs, recovery and Databricks boundary tests
 agent_packs/databricks/         development guidance for a calling agent
-apps/ executors/ infra/         service boundaries reserved for subsequent increments
+executors/                     reserved isolated/private executor boundary
+infra/                         local PostgreSQL/Temporal development services
 tools/                         contract generation and vendor-schema checks
 ```
 

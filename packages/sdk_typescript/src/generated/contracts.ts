@@ -11,14 +11,31 @@ export type ShifdeContracts =
   | ErrorEnvelope
   | BuildSubmission
   | PlanSubmission
-  | DeploymentSubmission;
+  | DeploymentSubmission
+  | ApplicationSubmission
+  | ConnectionSubmission
+  | Connection
+  | TargetSubmission
+  | TargetPatch
+  | ProjectSubmission
+  | SourceUploadSubmission
+  | SourceUpload
+  | SourceUploadCompletion
+  | ScaffoldSubmission
+  | InspectionSubmission
+  | ValidationSubmission
+  | OperationControl
+  | PolicyDecisionSubmission
+  | EventPage
+  | DeploymentView;
 export type CreatedAt = string;
 export type Code = string;
 export type Message = string;
 export type Path = string | null;
 export type Id = string;
 export type OperationKind = "inspection" | "scaffold" | "validation" | "build" | "plan" | "deployment";
-export type Result = (BuildResult | PlanResult | DeploymentResult) | null;
+export type Result =
+  (BuildResult | PlanResult | DeploymentResult | ScaffoldResult | ValidationResult | InspectionResult) | null;
 export type ResultKind = "build";
 export type AdapterVersion = string;
 export type ApplicationId = string;
@@ -101,6 +118,11 @@ export type Id4 = string;
 export type Resources1 = ResourceBinding[];
 export type TargetId2 = string;
 export type TenantId3 = string;
+export type ResultKind3 = "scaffold";
+export type ResultKind4 = "validation";
+export type Diagnostics = Diagnostic[];
+export type Passed = boolean;
+export type ResultKind5 = "inspection";
 export type State =
   | "queued"
   | "running"
@@ -138,6 +160,51 @@ export type ArtifactId1 = string;
 export type TargetId4 = string;
 export type ArtifactId2 = string;
 export type PlanId = string;
+export type Kind4 = "databricks.app/v1" | "palantir.superrepo/v1" | "snowflake.native-app/v1" | "fabric.solution/v1";
+export type Name = string;
+export type CredentialRef = string;
+export type Host1 = string;
+export type Name1 = string;
+export type CredentialRef1 = string;
+export type Host2 = string;
+export type Id8 = string;
+export type Name2 = string;
+export type Revision1 = number;
+export type TenantId8 = string;
+export type ConnectionId1 = string;
+export type Environment1 = string;
+export type Bindings3 = {
+  [k: string]: string;
+} | null;
+export type Environment2 = string | null;
+export type ApplicationId6 = string;
+export type SourceId = string;
+export type Spec2 =
+  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+export type Digest2 = string;
+export type Size1 = number;
+export type Digest3 = string;
+export type ExpiresAt1 = string;
+export type Id9 = string;
+export type Size2 = number;
+export type TenantId9 = string;
+export type UploadId = string;
+export type ApplicationId7 = string;
+export type Spec3 =
+  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+export type TemplateVersion1 = string;
+export type ApplicationId8 = string;
+export type TargetId5 = string;
+export type ProjectId1 = string;
+export type OperationId = string;
+export type Approve = boolean;
+export type OperationId1 = string;
+export type PlanDigest = string;
+export type CreatedAt2 = string;
+export type Name3 = string;
+export type Seq = number;
+export type Data = OperationEvent[];
+export type NextCursor = number;
 
 export interface Operation {
   created_at: CreatedAt;
@@ -273,6 +340,22 @@ export interface Deployment {
   target_id: TargetId2;
   tenant_id: TenantId3;
 }
+export interface ScaffoldResult {
+  result_kind: ResultKind3;
+  value: SourceArchive;
+}
+export interface ValidationResult {
+  result_kind: ResultKind4;
+  value: ValidationReport;
+}
+export interface ValidationReport {
+  diagnostics: Diagnostics;
+  passed: Passed;
+}
+export interface InspectionResult {
+  result_kind: ResultKind5;
+  value: EnvironmentSnapshot;
+}
 export interface ApplyReceipt {
   application_id: ApplicationId4;
   artifact_digest: ArtifactDigest2;
@@ -324,4 +407,90 @@ export interface PlanSubmission {
 export interface DeploymentSubmission {
   artifact_id: ArtifactId2;
   plan_id: PlanId;
+}
+export interface ApplicationSubmission {
+  kind: Kind4;
+  name: Name;
+}
+export interface ConnectionSubmission {
+  credential_ref: CredentialRef;
+  host: Host1;
+  name: Name1;
+}
+export interface Connection {
+  credential_ref: CredentialRef1;
+  host: Host2;
+  id: Id8;
+  name: Name2;
+  revision: Revision1;
+  tenant_id: TenantId8;
+}
+export interface TargetSubmission {
+  bindings: Bindings2;
+  connection_id: ConnectionId1;
+  environment: Environment1;
+}
+export interface Bindings2 {
+  [k: string]: string;
+}
+export interface TargetPatch {
+  bindings: Bindings3;
+  environment: Environment2;
+}
+export interface ProjectSubmission {
+  application_id: ApplicationId6;
+  source_id: SourceId;
+  spec: Spec2;
+}
+export interface SourceUploadSubmission {
+  digest: Digest2;
+  size: Size1;
+}
+export interface SourceUpload {
+  digest: Digest3;
+  expires_at: ExpiresAt1;
+  id: Id9;
+  size: Size2;
+  source: SourceArchive | null;
+  tenant_id: TenantId9;
+}
+export interface SourceUploadCompletion {
+  upload_id: UploadId;
+}
+export interface ScaffoldSubmission {
+  application_id: ApplicationId7;
+  spec: Spec3;
+  template_version: TemplateVersion1;
+}
+export interface InspectionSubmission {
+  application_id: ApplicationId8;
+  target_id: TargetId5;
+}
+export interface ValidationSubmission {
+  project_id: ProjectId1;
+}
+export interface OperationControl {
+  operation_id: OperationId;
+}
+export interface PolicyDecisionSubmission {
+  approve: Approve;
+  operation_id: OperationId1;
+  plan_digest: PlanDigest;
+}
+export interface EventPage {
+  data: Data;
+  next_cursor: NextCursor;
+}
+export interface OperationEvent {
+  created_at: CreatedAt2;
+  data: Data1;
+  name: Name3;
+  seq: Seq;
+}
+export interface Data1 {
+  [k: string]: JsonValue;
+}
+export interface DeploymentView {
+  deployment: Deployment;
+  operation: Operation;
 }

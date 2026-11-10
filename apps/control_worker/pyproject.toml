@@ -1,0 +1,15 @@
+[project]
+name = "shifde-control-worker"
+version = "0.1.0"
+requires-python = ">=3.12,<3.14"
+dependencies = ["shifde-hosted", "shifde-api", "temporalio>=1.15,<2"]
+
+[project.scripts]
+shifde-worker = "shifde_control_worker.main:main"
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shifde_control_worker"]

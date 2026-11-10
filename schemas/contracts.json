@@ -1,5 +1,32 @@
 {
   "$defs": {
+    "ApplicationSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "databricks.app/v1",
+            "palantir.superrepo/v1",
+            "snowflake.native-app/v1",
+            "fabric.solution/v1"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind"
+      ],
+      "title": "ApplicationSubmission",
+      "type": "object"
+    },
     "ApplyReceipt": {
       "additionalProperties": false,
       "properties": {
@@ -175,6 +202,75 @@
         "project_id"
       ],
       "title": "BuildSubmission",
+      "type": "object"
+    },
+    "Connection": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_ref": {
+          "title": "Credential Ref",
+          "type": "string"
+        },
+        "host": {
+          "title": "Host",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "revision": {
+          "default": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "name",
+        "host",
+        "credential_ref",
+        "revision"
+      ],
+      "title": "Connection",
+      "type": "object"
+    },
+    "ConnectionSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Credential Ref",
+          "type": "string"
+        },
+        "host": {
+          "title": "Host",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "host",
+        "credential_ref"
+      ],
+      "title": "ConnectionSubmission",
       "type": "object"
     },
     "DatabricksApplicationSpec": {
@@ -431,6 +527,23 @@
       "title": "DeploymentSubmission",
       "type": "object"
     },
+    "DeploymentView": {
+      "additionalProperties": false,
+      "properties": {
+        "deployment": {
+          "$ref": "#/$defs/Deployment"
+        },
+        "operation": {
+          "$ref": "#/$defs/Operation"
+        }
+      },
+      "required": [
+        "deployment",
+        "operation"
+      ],
+      "title": "DeploymentView",
+      "type": "object"
+    },
     "Diagnostic": {
       "additionalProperties": false,
       "properties": {
@@ -535,6 +648,28 @@
         "error"
       ],
       "title": "ErrorEnvelope",
+      "type": "object"
+    },
+    "EventPage": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/OperationEvent"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "next_cursor": {
+          "title": "Next Cursor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "data",
+        "next_cursor"
+      ],
+      "title": "EventPage",
       "type": "object"
     },
     "FabricApplicationSpec": {
@@ -659,6 +794,47 @@
       "title": "FoundryApplicationSpec",
       "type": "object"
     },
+    "InspectionResult": {
+      "additionalProperties": false,
+      "properties": {
+        "result_kind": {
+          "const": "inspection",
+          "default": "inspection",
+          "title": "Result Kind",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/EnvironmentSnapshot"
+        }
+      },
+      "required": [
+        "result_kind",
+        "value"
+      ],
+      "title": "InspectionResult",
+      "type": "object"
+    },
+    "InspectionSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "format": "uuid",
+          "title": "Application Id",
+          "type": "string"
+        },
+        "target_id": {
+          "format": "uuid",
+          "title": "Target Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "target_id"
+      ],
+      "title": "InspectionSubmission",
+      "type": "object"
+    },
     "JsonValue": {},
     "Operation": {
       "additionalProperties": false,
@@ -703,7 +879,10 @@
                 "mapping": {
                   "build": "#/$defs/BuildResult",
                   "deployment": "#/$defs/DeploymentResult",
-                  "plan": "#/$defs/PlanResult"
+                  "inspection": "#/$defs/InspectionResult",
+                  "plan": "#/$defs/PlanResult",
+                  "scaffold": "#/$defs/ScaffoldResult",
+                  "validation": "#/$defs/ValidationResult"
                 },
                 "propertyName": "result_kind"
               },
@@ -716,6 +895,15 @@
                 },
                 {
                   "$ref": "#/$defs/DeploymentResult"
+                },
+                {
+                  "$ref": "#/$defs/ScaffoldResult"
+                },
+                {
+                  "$ref": "#/$defs/ValidationResult"
+                },
+                {
+                  "$ref": "#/$defs/InspectionResult"
                 }
               ]
             },
@@ -757,6 +945,54 @@
         "error"
       ],
       "title": "Operation",
+      "type": "object"
+    },
+    "OperationControl": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_id"
+      ],
+      "title": "OperationControl",
+      "type": "object"
+    },
+    "OperationEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Data",
+          "type": "object"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "seq": {
+          "title": "Seq",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seq",
+        "name",
+        "data",
+        "created_at"
+      ],
+      "title": "OperationEvent",
       "type": "object"
     },
     "PlanResult": {
@@ -837,6 +1073,32 @@
       "title": "PlanSubmission",
       "type": "object"
     },
+    "PolicyDecisionSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "approve": {
+          "title": "Approve",
+          "type": "boolean"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "plan_digest": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_id",
+        "plan_digest",
+        "approve"
+      ],
+      "title": "PolicyDecisionSubmission",
+      "type": "object"
+    },
     "Project": {
       "additionalProperties": false,
       "properties": {
@@ -902,6 +1164,54 @@
       "title": "Project",
       "type": "object"
     },
+    "ProjectSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "format": "uuid",
+          "title": "Application Id",
+          "type": "string"
+        },
+        "source_id": {
+          "format": "uuid",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "spec": {
+          "discriminator": {
+            "mapping": {
+              "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
+              "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
+              "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DatabricksApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/SnowflakeApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FabricApplicationSpec"
+            }
+          ],
+          "title": "Spec"
+        }
+      },
+      "required": [
+        "application_id",
+        "source_id",
+        "spec"
+      ],
+      "title": "ProjectSubmission",
+      "type": "object"
+    },
     "ResourceBinding": {
       "additionalProperties": false,
       "properties": {
@@ -936,6 +1246,74 @@
         "target_id"
       ],
       "title": "ResourceBinding",
+      "type": "object"
+    },
+    "ScaffoldResult": {
+      "additionalProperties": false,
+      "properties": {
+        "result_kind": {
+          "const": "scaffold",
+          "default": "scaffold",
+          "title": "Result Kind",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourceArchive"
+        }
+      },
+      "required": [
+        "result_kind",
+        "value"
+      ],
+      "title": "ScaffoldResult",
+      "type": "object"
+    },
+    "ScaffoldSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "format": "uuid",
+          "title": "Application Id",
+          "type": "string"
+        },
+        "spec": {
+          "discriminator": {
+            "mapping": {
+              "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
+              "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
+              "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DatabricksApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/SnowflakeApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FabricApplicationSpec"
+            }
+          ],
+          "title": "Spec"
+        },
+        "template_version": {
+          "default": "0.1.0",
+          "title": "Template Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "spec",
+        "template_version"
+      ],
+      "title": "ScaffoldSubmission",
       "type": "object"
     },
     "SnowflakeApplicationSpec": {
@@ -1030,6 +1408,93 @@
       "title": "SourceArchive",
       "type": "object"
     },
+    "SourceUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceArchive"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "digest",
+        "size",
+        "expires_at",
+        "source"
+      ],
+      "title": "SourceUpload",
+      "type": "object"
+    },
+    "SourceUploadCompletion": {
+      "additionalProperties": false,
+      "properties": {
+        "upload_id": {
+          "format": "uuid",
+          "title": "Upload Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upload_id"
+      ],
+      "title": "SourceUploadCompletion",
+      "type": "object"
+    },
+    "SourceUploadSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "size": {
+          "maximum": 20971520,
+          "minimum": 1,
+          "title": "Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "digest",
+        "size"
+      ],
+      "title": "SourceUploadSubmission",
+      "type": "object"
+    },
     "Target": {
       "additionalProperties": false,
       "properties": {
@@ -1083,6 +1548,134 @@
       ],
       "title": "Target",
       "type": "object"
+    },
+    "TargetPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "maxProperties": 50,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bindings"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Environment"
+        }
+      },
+      "required": [
+        "environment",
+        "bindings"
+      ],
+      "title": "TargetPatch",
+      "type": "object"
+    },
+    "TargetSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 50,
+          "title": "Bindings",
+          "type": "object"
+        },
+        "connection_id": {
+          "format": "uuid",
+          "title": "Connection Id",
+          "type": "string"
+        },
+        "environment": {
+          "default": "dev",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Environment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "connection_id",
+        "environment",
+        "bindings"
+      ],
+      "title": "TargetSubmission",
+      "type": "object"
+    },
+    "ValidationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/Diagnostic"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "passed",
+        "diagnostics"
+      ],
+      "title": "ValidationReport",
+      "type": "object"
+    },
+    "ValidationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "result_kind": {
+          "const": "validation",
+          "default": "validation",
+          "title": "Result Kind",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValidationReport"
+        }
+      },
+      "required": [
+        "result_kind",
+        "value"
+      ],
+      "title": "ValidationResult",
+      "type": "object"
+    },
+    "ValidationSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "format": "uuid",
+          "title": "Project Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "title": "ValidationSubmission",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1119,6 +1712,54 @@
     },
     {
       "$ref": "#/$defs/DeploymentSubmission"
+    },
+    {
+      "$ref": "#/$defs/ApplicationSubmission"
+    },
+    {
+      "$ref": "#/$defs/ConnectionSubmission"
+    },
+    {
+      "$ref": "#/$defs/Connection"
+    },
+    {
+      "$ref": "#/$defs/TargetSubmission"
+    },
+    {
+      "$ref": "#/$defs/TargetPatch"
+    },
+    {
+      "$ref": "#/$defs/ProjectSubmission"
+    },
+    {
+      "$ref": "#/$defs/SourceUploadSubmission"
+    },
+    {
+      "$ref": "#/$defs/SourceUpload"
+    },
+    {
+      "$ref": "#/$defs/SourceUploadCompletion"
+    },
+    {
+      "$ref": "#/$defs/ScaffoldSubmission"
+    },
+    {
+      "$ref": "#/$defs/InspectionSubmission"
+    },
+    {
+      "$ref": "#/$defs/ValidationSubmission"
+    },
+    {
+      "$ref": "#/$defs/OperationControl"
+    },
+    {
+      "$ref": "#/$defs/PolicyDecisionSubmission"
+    },
+    {
+      "$ref": "#/$defs/EventPage"
+    },
+    {
+      "$ref": "#/$defs/DeploymentView"
     }
   ],
   "title": "ShifdeContracts"

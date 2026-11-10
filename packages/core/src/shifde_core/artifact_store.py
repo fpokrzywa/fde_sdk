@@ -7,12 +7,20 @@ import stat
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Protocol
 from uuid import UUID
 
 from shifde_contracts.common import SourceArchive, relative_path
 
 MAX_ARCHIVE_BYTES = 20 * 1024 * 1024
 MAX_FILES = 500
+
+
+class ArtifactStore(Protocol):
+    root: Path
+
+    def put(self, tenant_id: UUID, data: bytes) -> SourceArchive: ...
+    def read(self, reference: SourceArchive, tenant_id: UUID) -> bytes: ...
 
 
 def read_archive(data: bytes) -> dict[str, bytes]:

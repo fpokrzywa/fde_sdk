@@ -1,0 +1,1 @@
+"""Authenticated hosted delivery API."""
