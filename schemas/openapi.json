@@ -262,6 +262,54 @@
         "title": "CapabilityReport",
         "type": "object"
       },
+      "CheckpointSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "fence": {
+            "minimum": 1.0,
+            "title": "Fence",
+            "type": "integer"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          },
+          "phase": {
+            "enum": [
+              "intent",
+              "complete"
+            ],
+            "title": "Phase",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "step": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Step",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lease_id",
+          "fence",
+          "sequence",
+          "phase",
+          "step",
+          "data"
+        ],
+        "title": "CheckpointSubmission",
+        "type": "object"
+      },
       "Connection": {
         "additionalProperties": false,
         "properties": {
@@ -329,6 +377,62 @@
           "credential_ref"
         ],
         "title": "ConnectionSubmission",
+        "type": "object"
+      },
+      "CredentialGrant": {
+        "additionalProperties": false,
+        "properties": {
+          "audience": {
+            "title": "Audience",
+            "type": "string"
+          },
+          "credential_ref": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+            "title": "Credential Ref",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "pool_id": {
+            "format": "uuid",
+            "title": "Pool Id",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "worker_id": {
+            "format": "uuid",
+            "title": "Worker Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "job_id",
+          "worker_id",
+          "pool_id",
+          "target_id",
+          "credential_ref",
+          "audience",
+          "expires_at"
+        ],
+        "title": "CredentialGrant",
         "type": "object"
       },
       "DatabricksApplicationSpec-Input": {
@@ -726,6 +830,140 @@
         "title": "EventPage",
         "type": "object"
       },
+      "ExecutionJob": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "capabilities",
+              "inspect",
+              "scaffold",
+              "validate",
+              "build",
+              "plan",
+              "apply",
+              "observe",
+              "reconcile",
+              "verify"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "credential_ref": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credential Ref"
+          },
+          "deadline": {
+            "format": "date-time",
+            "title": "Deadline",
+            "type": "string"
+          },
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/SourceArchive"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "journal": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Journal",
+            "type": "object"
+          },
+          "operation_fence": {
+            "minimum": 1.0,
+            "title": "Operation Fence",
+            "type": "integer"
+          },
+          "operation_id": {
+            "format": "uuid",
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "owned_resources": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceBinding"
+            },
+            "title": "Owned Resources",
+            "type": "array"
+          },
+          "pool_id": {
+            "format": "uuid",
+            "title": "Pool Id",
+            "type": "string"
+          },
+          "request": {
+            "additionalProperties": true,
+            "title": "Request",
+            "type": "object"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Target"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "toolchain_digest": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Toolchain Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "operation_id",
+          "execution_id",
+          "operation_fence",
+          "pool_id",
+          "action",
+          "image",
+          "request",
+          "target",
+          "owned_resources",
+          "inputs",
+          "toolchain_digest",
+          "deadline",
+          "credential_ref",
+          "journal"
+        ],
+        "title": "ExecutionJob",
+        "type": "object"
+      },
       "FabricApplicationSpec-Input": {
         "additionalProperties": false,
         "properties": {
@@ -1017,7 +1255,142 @@
         "title": "InspectionSubmission",
         "type": "object"
       },
+      "JobLease": {
+        "additionalProperties": false,
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "fence": {
+            "minimum": 1.0,
+            "title": "Fence",
+            "type": "integer"
+          },
+          "job": {
+            "$ref": "#/components/schemas/ExecutionJob"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lease_id",
+          "fence",
+          "job",
+          "expires_at",
+          "request_id"
+        ],
+        "title": "JobLease",
+        "type": "object"
+      },
+      "JobResultSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "error_code": {
+            "anyOf": [
+              {
+                "enum": [
+                  "EXECUTION_FAILED",
+                  "CREDENTIAL_UNAVAILABLE",
+                  "SANDBOX_FAILED"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "fence": {
+            "minimum": 1.0,
+            "title": "Fence",
+            "type": "integer"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "lease_id",
+          "fence",
+          "status"
+        ],
+        "title": "JobResultSubmission",
+        "type": "object"
+      },
       "JsonValue": {},
+      "LeaseProof": {
+        "additionalProperties": false,
+        "properties": {
+          "fence": {
+            "minimum": 1.0,
+            "title": "Fence",
+            "type": "integer"
+          },
+          "lease_id": {
+            "format": "uuid",
+            "title": "Lease Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lease_id",
+          "fence"
+        ],
+        "title": "LeaseProof",
+        "type": "object"
+      },
+      "LeaseRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "LeaseRequest",
+        "type": "object"
+      },
       "Operation": {
         "additionalProperties": false,
         "properties": {
@@ -1999,6 +2372,532 @@
           }
         },
         "summary": "Ready"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/artifacts": {
+      "post": {
+        "operationId": "output_internal_v1_execution_jobs__identity__artifacts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Lease-Id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Lease-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Execution-Fence",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "X-Execution-Fence",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Output"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/artifacts/{source_id}": {
+      "get": {
+        "operationId": "source_internal_v1_execution_jobs__identity__artifacts__source_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Lease-Id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Lease-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Execution-Fence",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "X-Execution-Fence",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Source"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/checkpoints": {
+      "post": {
+        "operationId": "checkpoint_internal_v1_execution_jobs__identity__checkpoints_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckpointSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Checkpoint"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/credential-grants": {
+      "post": {
+        "operationId": "credentials_internal_v1_execution_jobs__identity__credential_grants_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseProof"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialGrant"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Credentials"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/guards": {
+      "post": {
+        "operationId": "guard_internal_v1_execution_jobs__identity__guards_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseProof"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Guard"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/heartbeats": {
+      "post": {
+        "operationId": "heartbeat_internal_v1_execution_jobs__identity__heartbeats_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseProof"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Heartbeat"
+      }
+    },
+    "/internal/v1/execution-jobs/{identity}/results": {
+      "post": {
+        "operationId": "result_internal_v1_execution_jobs__identity__results_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobResultSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Result"
+      }
+    },
+    "/internal/v1/job-leases": {
+      "post": {
+        "operationId": "lease_internal_v1_job_leases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/JobLease"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Lease Internal V1 Job Leases Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Bearer identity required"
+          },
+          "403": {
+            "description": "Permission denied"
+          },
+          "409": {
+            "description": "State conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lease"
       }
     },
     "/v1/applications": {

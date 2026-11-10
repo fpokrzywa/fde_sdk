@@ -42,7 +42,7 @@ class Database:
             version: str = connection.exec_driver_sql(
                 "SELECT version_num FROM alembic_version"
             ).scalar_one()
-            if version != "0001_hosted":
+            if version != "0002_executors":
                 raise RuntimeError("database migration version is not supported")
 
     def close(self):

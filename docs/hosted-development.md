@@ -69,7 +69,7 @@ uv run shifde-worker dispatcher
 uv run shifde-worker execution
 ```
 
-`shifde-mcp` serves both `/v1` and Streamable HTTP `/mcp` on port 8000. Alternatively `shifde-api` serves HTTP only. Do not bind both to the same port. Development mode permits `shifde-worker all`. Production uses separate control and execution queues/identities. API and MCP need PostgreSQL/artifact access; only workers/dispatcher need Temporal connectivity. The execution worker must be trusted, with egress restricted to its configured platforms and storage.
+`shifde-mcp` serves both `/v1` and Streamable HTTP `/mcp` on port 8000. Alternatively `shifde-api` serves HTTP only. Do not bind both to the same port. Development mode permits `shifde-worker all`. Production uses separate control and execution queues/identities. API and MCP need PostgreSQL/artifact access; only coordination workers/dispatcher need Temporal connectivity. `shifde-worker execution` now dispatches isolated gateway jobs; enroll and run outbound supervisors using the [executor operating guide](executor-operations.md). Those supervisors need neither PostgreSQL nor Temporal access, and only they resolve native credentials.
 
 For a local MCP client that supports only stdio, run `shifde-mcp --stdio` with an explicit `SHIFDE_API_URL` HTTPS origin and `SHIFDE_CALLER_TOKEN` for the API audience. It forwards that caller token to HTTP; there is no service-identity fallback. Refresh that environment token by restarting the bridge when needed.
 
@@ -108,4 +108,4 @@ pnpm typecheck
 
 Without service configuration the hosted integration tests skip; CI has a separate job that provisions both services. Tests exercise actual PostgreSQL RLS under a non-superuser and actual Temporal workflows. Only Databricks SDK/CLI boundaries are faked. No live Databricks deployment or cloud infrastructure rollout is claimed.
 
-The execution worker supports the existing bounded source-only Databricks App adapter. It does not execute uploaded application code locally. General isolated compilation, private outbound executors, broader platform adapters, production observability/quotas and cloud infrastructure provisioning remain later milestones.
+The isolated executor supports the existing bounded source-only Databricks App adapter. It does not execute uploaded application code locally. Hosted and private outbound supervisors are implemented. General hostile-code compilation, broader platform adapters, production observability/quotas and cloud infrastructure provisioning remain later milestones.

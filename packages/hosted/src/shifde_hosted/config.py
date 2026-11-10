@@ -11,7 +11,8 @@ class CredentialBinding(Model):
     tenant_id: UUID
     host: str
     require_approval: bool = False
-    mode: Literal["token_env", "oauth_env", "key_vault"]
+    mode: Literal["token_env", "oauth_env", "key_vault", "private"]
+    execution_pool_id: UUID | None = None
     token_env: str | None = None
     client_id_env: str | None = None
     client_secret_env: str | None = None

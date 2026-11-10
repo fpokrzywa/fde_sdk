@@ -27,7 +27,15 @@ export type ShifdeContracts =
   | OperationControl
   | PolicyDecisionSubmission
   | EventPage
-  | DeploymentView;
+  | DeploymentView
+  | WorkerPool
+  | ExecutionJob
+  | JobLease
+  | LeaseProof
+  | LeaseRequest
+  | CheckpointSubmission
+  | JobResultSubmission
+  | CredentialGrant;
 export type CreatedAt = string;
 export type Code = string;
 export type Message = string;
@@ -205,6 +213,93 @@ export type Name3 = string;
 export type Seq = number;
 export type Data = OperationEvent[];
 export type NextCursor = number;
+/**
+ * @minItems 1
+ */
+export type Actions = [
+  (
+    | "capabilities"
+    | "inspect"
+    | "scaffold"
+    | "validate"
+    | "build"
+    | "plan"
+    | "apply"
+    | "observe"
+    | "reconcile"
+    | "verify"
+  ),
+  ...(
+    | "capabilities"
+    | "inspect"
+    | "scaffold"
+    | "validate"
+    | "build"
+    | "plan"
+    | "apply"
+    | "observe"
+    | "reconcile"
+    | "verify"
+  )[]
+];
+export type ConnectionIds = string[];
+export type Enabled = boolean;
+export type Id10 = string;
+export type Image = string;
+export type Mode = "hosted" | "private";
+export type Name4 = string;
+export type TenantId10 = string;
+export type Action1 =
+  | "capabilities"
+  | "inspect"
+  | "scaffold"
+  | "validate"
+  | "build"
+  | "plan"
+  | "apply"
+  | "observe"
+  | "reconcile"
+  | "verify";
+export type CredentialRef2 = string | null;
+export type Deadline = string;
+export type ExecutionId = string;
+export type Id11 = string;
+export type Image1 = string;
+export type Inputs = SourceArchive[];
+export type OperationFence = number;
+export type OperationId2 = string;
+export type OwnedResources = ResourceBinding[];
+export type PoolId = string;
+export type TenantId11 = string;
+export type ToolchainDigest2 = string;
+export type ExpiresAt2 = string;
+export type Fence = number;
+export type LeaseId = string;
+export type RequestId = string;
+export type Fence1 = number;
+export type LeaseId1 = string;
+export type Image2 = string;
+export type RequestId1 = string;
+export type Fence2 = number;
+export type LeaseId2 = string;
+export type Phase = "intent" | "complete";
+export type Sequence = number;
+export type Step = string;
+export type ErrorCode = ("EXECUTION_FAILED" | "CREDENTIAL_UNAVAILABLE" | "SANDBOX_FAILED") | null;
+export type Fence3 = number;
+export type LeaseId3 = string;
+export type Status = "succeeded" | "failed";
+export type Value = {
+  [k: string]: unknown;
+} | null;
+export type Audience = string;
+export type CredentialRef3 = string;
+export type ExpiresAt3 = string;
+export type JobId = string;
+export type PoolId1 = string;
+export type TargetId6 = string;
+export type TenantId12 = string;
+export type WorkerId = string;
 
 export interface Operation {
   created_at: CreatedAt;
@@ -493,4 +588,83 @@ export interface Data1 {
 export interface DeploymentView {
   deployment: Deployment;
   operation: Operation;
+}
+export interface WorkerPool {
+  actions: Actions;
+  connection_ids: ConnectionIds;
+  enabled: Enabled;
+  id: Id10;
+  image: Image;
+  mode: Mode;
+  name: Name4;
+  tenant_id: TenantId10;
+}
+export interface ExecutionJob {
+  action: Action1;
+  credential_ref: CredentialRef2;
+  deadline: Deadline;
+  execution_id: ExecutionId;
+  id: Id11;
+  image: Image1;
+  inputs: Inputs;
+  journal: Journal;
+  operation_fence: OperationFence;
+  operation_id: OperationId2;
+  owned_resources: OwnedResources;
+  pool_id: PoolId;
+  request: Request;
+  target: Target | null;
+  tenant_id: TenantId11;
+  toolchain_digest: ToolchainDigest2;
+}
+export interface Journal {
+  [k: string]: {
+    [k: string]: unknown;
+  };
+}
+export interface Request {
+  [k: string]: unknown;
+}
+export interface JobLease {
+  expires_at: ExpiresAt2;
+  fence: Fence;
+  job: ExecutionJob;
+  lease_id: LeaseId;
+  request_id: RequestId;
+}
+export interface LeaseProof {
+  fence: Fence1;
+  lease_id: LeaseId1;
+}
+export interface LeaseRequest {
+  image: Image2;
+  request_id: RequestId1;
+}
+export interface CheckpointSubmission {
+  data: Data2;
+  fence: Fence2;
+  lease_id: LeaseId2;
+  phase: Phase;
+  sequence: Sequence;
+  step: Step;
+}
+export interface Data2 {
+  [k: string]: unknown;
+}
+export interface JobResultSubmission {
+  error_code: ErrorCode;
+  fence: Fence3;
+  lease_id: LeaseId3;
+  status: Status;
+  value: Value;
+}
+export interface CredentialGrant {
+  audience: Audience;
+  credential_ref: CredentialRef3;
+  expires_at: ExpiresAt3;
+  job_id: JobId;
+  pool_id: PoolId1;
+  target_id: TargetId6;
+  tenant_id: TenantId12;
+  worker_id: WorkerId;
 }

@@ -5,6 +5,7 @@ from typing import Any
 from uuid import UUID
 
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.core import Config
 from shifde_contracts.hosted import Connection
 from shifde_core.hashing import digest
 from shifde_databricks.adapter import DatabricksAdapter
@@ -40,6 +41,8 @@ class DatabricksRuntimeFactory:
                 r.resource(c, target.tenant_id, "connection", target.connection_id)["data"]
             )
         binding = self.settings.credential_bindings.get(conn.credential_ref)
+        if binding and binding.mode == "private":
+            raise Forbidden()
         if (
             not binding
             or binding.tenant_id != target.tenant_id
@@ -85,7 +88,7 @@ class DatabricksRuntimeFactory:
                 if not value:
                     raise ValueError("configured credential is unavailable")
                 options.update(token=value, auth_type="pat")
-            client = WorkspaceClient(**options)
+            client = WorkspaceClient(config=Config(**options))
             self._clients[key] = (time.monotonic() + 60, client)
             return client
 

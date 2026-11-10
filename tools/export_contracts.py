@@ -26,6 +26,16 @@ from shifde_contracts.hosted import (
     TargetSubmission,
     ValidationSubmission,
 )
+from shifde_contracts.jobs import (
+    CheckpointSubmission,
+    CredentialGrant,
+    ExecutionJob,
+    JobLease,
+    JobResultSubmission,
+    LeaseProof,
+    LeaseRequest,
+    WorkerPool,
+)
 from shifde_contracts.operations import ErrorEnvelope, Operation
 from shifde_contracts.plans import DeploymentPlan
 from shifde_contracts.projects import ApplicationSpec, Project
@@ -65,7 +75,15 @@ def export_contracts(output_dir: Path = ROOT / "schemas") -> None:
             | OperationControl
             | PolicyDecisionSubmission
             | EventPage
-            | DeploymentView,
+            | DeploymentView
+            | WorkerPool
+            | ExecutionJob
+            | JobLease
+            | LeaseProof
+            | LeaseRequest
+            | CheckpointSubmission
+            | JobResultSubmission
+            | CredentialGrant,
             # Hosted resource and operation requests use these same canonical models.
         )
     )

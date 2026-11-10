@@ -4,7 +4,9 @@ import asyncio
 from shifde_api.main import service_from_settings
 from shifde_hosted.config import Settings
 from shifde_hosted.executor import OperationExecutor
-from shifde_hosted.runtime import TOOLCHAIN_DIGEST, DatabricksRuntimeFactory
+from shifde_hosted.gateway import ExecutionGateway
+from shifde_hosted.remote_adapter import GatewayAdapter
+from shifde_hosted.runtime import TOOLCHAIN_DIGEST
 from temporalio.client import Client, TLSConfig
 from temporalio.worker import Worker
 
@@ -57,9 +59,9 @@ async def run(mode: str):
 
     executor = OperationExecutor(
         service,
-        adapter_factory=DatabricksRuntimeFactory(service, settings)
-        if mode in ("execution", "all")
-        else no_native,
+        adapter_factory=lambda _: (
+            GatewayAdapter(ExecutionGateway(service)) if mode in ("execution", "all") else no_native
+        ),
         toolchain_digest=TOOLCHAIN_DIGEST,
     )
     control = ControlActivities(executor)

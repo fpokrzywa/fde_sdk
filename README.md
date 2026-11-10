@@ -4,7 +4,7 @@ SHIFDE builds platform-specific applications through a shared delivery lifecycle
 
 The Databricks adapter scaffolds a Python app, packages immutable source, plans changes against native state, deploys a bounded app-only bundle, starts the app, and verifies native status plus an authenticated runtime warehouse check. Local steps and ownership survive process restarts. An uncertain native write stops execution for reconciliation.
 
-Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server. Hosted execution currently uses a trusted worker for source-only Databricks App deployment. General isolated compilation and private executors remain subsequent increments. Palantir, Snowflake and Fabric have native specification models; their deployment adapters are not implemented.
+Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server, then the [executor operating guide](docs/executor-operations.md) to enroll isolated hosted or outbound-only private workers. Each adapter action runs in a fresh container; production requires dedicated tenant VM hosts and signed digest-pinned images. General hostile-code compilation remains a later milestone. Palantir, Snowflake and Fabric have native specification models; their deployment adapters are not implemented.
 
 ## Install and verify
 
@@ -48,7 +48,7 @@ schemas/                       canonical exported JSON Schemas
 examples/                      local Databricks workflow and typed agent integration example
 tests/                         contracts, SDKs, recovery and Databricks boundary tests
 agent_packs/databricks/         development guidance for a calling agent
-executors/                     reserved isolated/private executor boundary
+executors/                     outbound supervisor, local credential broker and isolated runner
 infra/                         local PostgreSQL/Temporal development services
 tools/                         contract generation and vendor-schema checks
 ```

@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -24,9 +25,18 @@ class PostgresJournal:
         operation_id: UUID,
         execution_id: UUID,
         fence: int,
+        connection=None,
     ):
         self.database, self.tenant_id, self.operation_id = database, tenant_id, operation_id
         self.execution_id, self.fence = execution_id, fence
+        self.connection = connection
+
+    def _transaction(self):
+        return (
+            nullcontext(self.connection)
+            if self.connection is not None
+            else self.database.transaction(self.tenant_id)
+        )
 
     def _owner(self, c, *, writing: bool):
         row = r.operation(c, self.tenant_id, self.operation_id, lock=True)
@@ -43,11 +53,11 @@ class PostgresJournal:
         return row
 
     def guard(self):
-        with self.database.transaction(self.tenant_id) as c:
+        with self._transaction() as c:
             self._owner(c, writing=True)
 
     def intent(self, key: str, inputs: dict) -> bool:
-        with self.database.transaction(self.tenant_id) as c:
+        with self._transaction() as c:
             row = self._owner(c, writing=True)
             plan = r.resource(c, self.tenant_id, "plan", UUID(row["request"]["plan_id"]))["data"]
             if key not in {step["key"] for step in plan["steps"]} or inputs != {
@@ -83,7 +93,7 @@ class PostgresJournal:
             return True
 
     def complete(self, key: str, receipt: dict):
-        with self.database.transaction(self.tenant_id) as c:
+        with self._transaction() as c:
             self._owner(c, writing=False)
             old = (
                 c.execute(
@@ -111,7 +121,7 @@ class PostgresJournal:
             r.event(c, self.tenant_id, self.operation_id, "native_receipt", {"step": key})
 
     def completed(self, key: str) -> dict | None:
-        with self.database.transaction(self.tenant_id) as c:
+        with self._transaction() as c:
             row = c.execute(
                 sa.select(m.step_journal.c.receipt).where(
                     m.step_journal.c.operation_id == self.operation_id,
@@ -122,7 +132,7 @@ class PostgresJournal:
             return row.receipt if row else None
 
     def has_intent(self, key: str) -> bool:
-        with self.database.transaction(self.tenant_id) as c:
+        with self._transaction() as c:
             return (
                 c.execute(
                     sa.select(m.step_journal.c.key).where(

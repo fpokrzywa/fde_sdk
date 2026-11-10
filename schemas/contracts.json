@@ -204,6 +204,54 @@
       "title": "BuildSubmission",
       "type": "object"
     },
+    "CheckpointSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "fence": {
+          "minimum": 1,
+          "title": "Fence",
+          "type": "integer"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "intent",
+            "complete"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "step": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Step",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lease_id",
+        "fence",
+        "sequence",
+        "phase",
+        "step",
+        "data"
+      ],
+      "title": "CheckpointSubmission",
+      "type": "object"
+    },
     "Connection": {
       "additionalProperties": false,
       "properties": {
@@ -271,6 +319,62 @@
         "credential_ref"
       ],
       "title": "ConnectionSubmission",
+      "type": "object"
+    },
+    "CredentialGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "audience": {
+          "title": "Audience",
+          "type": "string"
+        },
+        "credential_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Credential Ref",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "job_id": {
+          "format": "uuid",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "pool_id": {
+          "format": "uuid",
+          "title": "Pool Id",
+          "type": "string"
+        },
+        "target_id": {
+          "format": "uuid",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "worker_id": {
+          "format": "uuid",
+          "title": "Worker Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "job_id",
+        "worker_id",
+        "pool_id",
+        "target_id",
+        "credential_ref",
+        "audience",
+        "expires_at"
+      ],
+      "title": "CredentialGrant",
       "type": "object"
     },
     "DatabricksApplicationSpec": {
@@ -672,6 +776,142 @@
       "title": "EventPage",
       "type": "object"
     },
+    "ExecutionJob": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "capabilities",
+            "inspect",
+            "scaffold",
+            "validate",
+            "build",
+            "plan",
+            "apply",
+            "observe",
+            "reconcile",
+            "verify"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "credential_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Credential Ref"
+        },
+        "deadline": {
+          "format": "date-time",
+          "title": "Deadline",
+          "type": "string"
+        },
+        "execution_id": {
+          "format": "uuid",
+          "title": "Execution Id",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/SourceArchive"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "journal": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Journal",
+          "type": "object"
+        },
+        "operation_fence": {
+          "minimum": 1,
+          "title": "Operation Fence",
+          "type": "integer"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "owned_resources": {
+          "items": {
+            "$ref": "#/$defs/ResourceBinding"
+          },
+          "title": "Owned Resources",
+          "type": "array"
+        },
+        "pool_id": {
+          "format": "uuid",
+          "title": "Pool Id",
+          "type": "string"
+        },
+        "request": {
+          "additionalProperties": true,
+          "title": "Request",
+          "type": "object"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "toolchain_digest": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Toolchain Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "operation_id",
+        "execution_id",
+        "operation_fence",
+        "pool_id",
+        "action",
+        "image",
+        "request",
+        "target",
+        "owned_resources",
+        "inputs",
+        "toolchain_digest",
+        "deadline",
+        "credential_ref",
+        "journal"
+      ],
+      "title": "ExecutionJob",
+      "type": "object"
+    },
     "FabricApplicationSpec": {
       "additionalProperties": false,
       "properties": {
@@ -835,7 +1075,147 @@
       "title": "InspectionSubmission",
       "type": "object"
     },
+    "JobLease": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "fence": {
+          "minimum": 1,
+          "title": "Fence",
+          "type": "integer"
+        },
+        "job": {
+          "$ref": "#/$defs/ExecutionJob"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        },
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lease_id",
+        "fence",
+        "job",
+        "expires_at",
+        "request_id"
+      ],
+      "title": "JobLease",
+      "type": "object"
+    },
+    "JobResultSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "error_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "EXECUTION_FAILED",
+                "CREDENTIAL_UNAVAILABLE",
+                "SANDBOX_FAILED"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "fence": {
+          "minimum": 1,
+          "title": "Fence",
+          "type": "integer"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "lease_id",
+        "fence",
+        "status",
+        "value",
+        "error_code"
+      ],
+      "title": "JobResultSubmission",
+      "type": "object"
+    },
     "JsonValue": {},
+    "LeaseProof": {
+      "additionalProperties": false,
+      "properties": {
+        "fence": {
+          "minimum": 1,
+          "title": "Fence",
+          "type": "integer"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lease_id",
+        "fence"
+      ],
+      "title": "LeaseProof",
+      "type": "object"
+    },
+    "LeaseRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image",
+        "request_id"
+      ],
+      "title": "LeaseRequest",
+      "type": "object"
+    },
     "Operation": {
       "additionalProperties": false,
       "properties": {
@@ -1676,6 +2056,84 @@
       ],
       "title": "ValidationSubmission",
       "type": "object"
+    },
+    "WorkerPool": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "enum": [
+              "capabilities",
+              "inspect",
+              "scaffold",
+              "validate",
+              "build",
+              "plan",
+              "apply",
+              "observe",
+              "reconcile",
+              "verify"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "connection_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Connection Ids",
+          "type": "array"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "image": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:/-]*@sha256:[a-f0-9]{64}$",
+          "title": "Image",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "hosted",
+            "private"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "name",
+        "mode",
+        "image",
+        "actions",
+        "connection_ids",
+        "enabled"
+      ],
+      "title": "WorkerPool",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1760,6 +2218,30 @@
     },
     {
       "$ref": "#/$defs/DeploymentView"
+    },
+    {
+      "$ref": "#/$defs/WorkerPool"
+    },
+    {
+      "$ref": "#/$defs/ExecutionJob"
+    },
+    {
+      "$ref": "#/$defs/JobLease"
+    },
+    {
+      "$ref": "#/$defs/LeaseProof"
+    },
+    {
+      "$ref": "#/$defs/LeaseRequest"
+    },
+    {
+      "$ref": "#/$defs/CheckpointSubmission"
+    },
+    {
+      "$ref": "#/$defs/JobResultSubmission"
+    },
+    {
+      "$ref": "#/$defs/CredentialGrant"
     }
   ],
   "title": "ShifdeContracts"

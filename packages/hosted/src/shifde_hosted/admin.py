@@ -2,9 +2,11 @@
 
 import argparse
 import os
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
+from shifde_contracts.jobs import WorkerPool
 from sqlalchemy.dialects.postgresql import insert
 
 from shifde_hosted.persistence import models as m
@@ -23,6 +25,13 @@ def main():
     member.add_argument("tenant_id", type=UUID)
     member.add_argument("subject")
     member.add_argument("role", choices=["reader", "editor", "deployer", "owner"])
+    pool = commands.add_parser("register-pool")
+    pool.add_argument("file", type=Path)
+    worker = commands.add_parser("register-executor")
+    worker.add_argument("tenant_id", type=UUID)
+    worker.add_argument("pool_id", type=UUID)
+    worker.add_argument("subject")
+    worker.add_argument("--id", type=UUID, default=None)
     args = parser.parse_args()
     url = os.environ["SHIFDE_ADMIN_DATABASE_URL"]
     if args.command == "migrate":
@@ -37,6 +46,35 @@ def main():
             if args.command == "create-tenant":
                 identity = args.id or uuid4()
                 c.execute(m.tenants.insert().values(id=identity))
+                print(identity)
+            elif args.command == "register-pool":
+                pool_model = WorkerPool.model_validate_json(args.file.read_text())
+                c.execute(
+                    sa.text("SELECT set_config('shifde.tenant_id', :tenant, true)"),
+                    {"tenant": str(pool_model.tenant_id)},
+                )
+                c.execute(
+                    m.worker_pools.insert().values(
+                        tenant_id=pool_model.tenant_id,
+                        id=pool_model.id,
+                        data=pool_model.model_dump(mode="json"),
+                    )
+                )
+                print(pool_model.id)
+            elif args.command == "register-executor":
+                identity = args.id or uuid4()
+                c.execute(
+                    sa.text("SELECT set_config('shifde.tenant_id', :tenant, true)"),
+                    {"tenant": str(args.tenant_id)},
+                )
+                c.execute(
+                    m.executors.insert().values(
+                        tenant_id=args.tenant_id,
+                        id=identity,
+                        pool_id=args.pool_id,
+                        subject=args.subject,
+                    )
+                )
                 print(identity)
             else:
                 # SET LOCAL also supports an owner role subject to FORCE RLS.

@@ -1,0 +1,8 @@
+**
+!infra/
+!infra/containers/
+!infra/containers/executor.Dockerfile
+!.tools/
+!.tools/executor-wheels/
+!.tools/executor-wheels/*.whl
+!.tools/executor-wheels/requirements.txt

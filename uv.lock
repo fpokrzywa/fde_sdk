@@ -9,6 +9,7 @@ members = [
     "shifde-control-worker",
     "shifde-core",
     "shifde-databricks",
+    "shifde-executor",
     "shifde-hosted",
     "shifde-mcp",
     "shifde-sdk",
@@ -1299,6 +1300,32 @@ requires-dist = [
 ]
 
 [[package]]
+name = "shifde-executor"
+version = "0.1.0"
+source = { editable = "executors" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic-settings" },
+    { name = "shifde-databricks" },
+]
+
+[package.optional-dependencies]
+azure = [
+    { name = "azure-identity" },
+    { name = "azure-keyvault-secrets" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "azure-identity", marker = "extra == 'azure'", specifier = ">=1.19,<2" },
+    { name = "azure-keyvault-secrets", marker = "extra == 'azure'", specifier = ">=4.9,<5" },
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "pydantic-settings", specifier = ">=2.8,<3" },
+    { name = "shifde-databricks", editable = "packages/adapters/databricks" },
+]
+provides-extras = ["azure"]
+
+[[package]]
 name = "shifde-hosted"
 version = "0.1.0"
 source = { editable = "packages/hosted" }
@@ -1374,6 +1401,7 @@ dependencies = [
     { name = "shifde-control-worker" },
     { name = "shifde-core" },
     { name = "shifde-databricks" },
+    { name = "shifde-executor" },
     { name = "shifde-hosted" },
     { name = "shifde-mcp" },
     { name = "shifde-sdk" },
@@ -1399,6 +1427,7 @@ requires-dist = [
     { name = "shifde-control-worker", editable = "apps/control_worker" },
     { name = "shifde-core", editable = "packages/core" },
     { name = "shifde-databricks", editable = "packages/adapters/databricks" },
+    { name = "shifde-executor", editable = "executors" },
     { name = "shifde-hosted", editable = "packages/hosted" },
     { name = "shifde-mcp", editable = "apps/mcp" },
     { name = "shifde-sdk", editable = "packages/sdk_python" },

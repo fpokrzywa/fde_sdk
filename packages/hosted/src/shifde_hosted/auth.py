@@ -30,7 +30,13 @@ class JWTVerifier:
         if jwks_url and not jwks_url.startswith("https://"):
             raise ValueError("JWKS must use HTTPS")
         self.issuer, self.audience, self.keys = issuer, audience, keys
+        self.jwks_url = jwks_url
         self.client = jwt.PyJWKClient(jwks_url, timeout=5) if jwks_url else None
+
+    def with_audience(self, audience: str):
+        return JWTVerifier(
+            issuer=self.issuer, audience=audience, keys=self.keys, jwks_url=self.jwks_url
+        )
 
     def verify(self, token: str) -> tuple[Principal, dict]:
         try:

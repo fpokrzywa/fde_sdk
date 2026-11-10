@@ -131,4 +131,41 @@ managed_namespaces = table(
     sa.Column("tenant_id", UUID(as_uuid=True)),
 )
 
+worker_pools = table("worker_pools", tenant(), identity(), sa.Column("data", JSONB))
+executors = table(
+    "executors",
+    tenant(),
+    identity(),
+    sa.Column("pool_id", UUID(as_uuid=True)),
+    sa.Column("subject", sa.Text),
+    sa.Column("enabled", sa.Boolean, server_default=sa.true()),
+)
+execution_jobs = table(
+    "execution_jobs",
+    tenant(),
+    identity(),
+    sa.Column("operation_id", UUID(as_uuid=True)),
+    sa.Column("pool_id", UUID(as_uuid=True)),
+    sa.Column("action", sa.Text),
+    sa.Column("data", JSONB),
+    sa.Column("state", sa.Text, server_default="queued"),
+    sa.Column("worker_id", UUID(as_uuid=True)),
+    sa.Column("lease_id", UUID(as_uuid=True)),
+    sa.Column("lease_request_id", UUID(as_uuid=True)),
+    sa.Column("fence", sa.BigInteger, server_default="0"),
+    sa.Column("lease_until", sa.DateTime(timezone=True)),
+    sa.Column("sequence", sa.BigInteger, server_default="0"),
+    sa.Column("result", JSONB),
+    sa.Column("outputs", JSONB, server_default="[]"),
+    sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+)
+execution_checkpoints = table(
+    "execution_checkpoints",
+    tenant(),
+    sa.Column("job_id", UUID(as_uuid=True), primary_key=True),
+    sa.Column("sequence", sa.BigInteger, primary_key=True),
+    sa.Column("digest", sa.Text),
+    sa.Column("response", JSONB),
+)
+
 TENANT_TABLES = [t.name for t in metadata.tables.values() if t.name != "tenants"]

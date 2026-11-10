@@ -21,9 +21,9 @@ jobs:
       - run: uv sync --frozen
       - run: pnpm install --frozen-lockfile
       - run: uv run pytest -q -m "not integration"
-      - run: uv run ruff check packages apps tools tests examples
-      - run: uv run ruff format --check packages apps tools tests examples
-      - run: uv run mypy packages apps tools examples --no-error-summary
+      - run: uv run ruff check packages apps executors tools tests examples
+      - run: uv run ruff format --check packages apps executors tools tests examples
+      - run: uv run mypy packages apps executors tools examples --no-error-summary
       - run: uv build --all-packages --wheel --out-dir .tools/dist --link-mode copy
       - run: pnpm test
       - run: pnpm typecheck
@@ -36,6 +36,10 @@ jobs:
   hosted:
     runs-on: ubuntu-latest
     services:
+      registry:
+        image: registry:3
+        ports:
+          - 5000:5000
       postgres:
         image: postgres:17.10
         env:
@@ -57,4 +61,6 @@ jobs:
       - run: uv sync --frozen
       - run: docker run -d --name temporal -p 127.0.0.1:7233:7233 temporalio/temporal:1.10.0 server start-dev --ip 0.0.0.0 --headless
       - run: uv run python tools/wait_for_temporal.py
-      - run: uv run pytest tests/hosted -q
+      - run: uv run python tools/build_executor_image.py --tag localhost:5000/shifde-executor:ci --push-local
+      - run: echo "SHIFDE_TEST_EXECUTOR_IMAGE=$(docker image inspect localhost:5000/shifde-executor:ci --format '{{index .RepoDigests 0}}')" >> "$GITHUB_ENV"
+      - run: uv run pytest tests/hosted tests/execution -q

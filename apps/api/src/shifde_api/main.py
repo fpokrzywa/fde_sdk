@@ -66,8 +66,14 @@ class BodyLimitMiddleware:
             return await self.app(scope, receive, send)
         limit = (
             MAX_ARCHIVE_BYTES
-            if scope["path"].startswith("/v1/source-uploads/")
-            and scope["path"].endswith("/content")
+            if (
+                scope["path"].startswith("/v1/source-uploads/")
+                and scope["path"].endswith("/content")
+            )
+            or (
+                scope["path"].startswith("/internal/v1/execution-jobs/")
+                and scope["path"].endswith("/artifacts")
+            )
             else 1024 * 1024
         )
         headers = dict(scope["headers"])
@@ -307,6 +313,9 @@ def create_app(
     def platform_schema(platform: str, actor: Actor):
         return service.platform_schema(actor, platform)
 
+    from shifde_api.gateway import install_gateway
+
+    install_gateway(app, service, verifier.with_audience(public_url.rstrip("/") + "/executor"))
     return app
 
 
