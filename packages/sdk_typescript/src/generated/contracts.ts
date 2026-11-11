@@ -63,7 +63,8 @@ export type Spec =
   | FoundryApplicationSpec
   | SnowflakeApplicationSpec
   | FabricApplicationSpec
-  | FabricIQApplicationSpec;
+  | FabricIQApplicationSpec
+  | FoundryMarketplaceSpec;
 export type AppResourceKey = string;
 export type BundleRoot = string;
 export type BundleTarget = string;
@@ -335,6 +336,17 @@ export type Kind4 = "fabric.iq/v1";
 export type SolutionRoot1 = string;
 export type VerificationNotebook1 = string | null;
 export type WorkspaceBinding1 = "workspace";
+export type FrontendAssetPath = string;
+export type FrontendAssetSha256 = string;
+export type FrontendOriginBinding = string;
+export type Kind5 = "palantir.marketplace/v1";
+export type MarketplaceBinding = string;
+export type NamespaceBinding = string;
+export type ObjectType = string;
+export type OntologyBinding1 = string;
+export type ParentFolderBinding = string;
+export type ProductBinding1 = string;
+export type VersionId = string;
 export type SpecDigest = string;
 export type TemplateVersion = string;
 export type TenantId1 = string;
@@ -405,7 +417,8 @@ export type Spec1 =
   | FoundryApplicationSpec
   | SnowflakeApplicationSpec
   | FabricApplicationSpec
-  | FabricIQApplicationSpec;
+  | FabricIQApplicationSpec
+  | FoundryMarketplaceSpec;
 export type TenantId6 = string;
 export type ConnectionId = string;
 export type ConnectionRevision1 = number;
@@ -422,8 +435,13 @@ export type ArtifactId1 = string;
 export type TargetId4 = string;
 export type ArtifactId2 = string;
 export type PlanId = string;
-export type Kind5 =
-  "databricks.app/v1" | "palantir.superrepo/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1";
+export type Kind6 =
+  | "palantir.marketplace/v1"
+  | "databricks.app/v1"
+  | "palantir.superrepo/v1"
+  | "snowflake.native-app/v1"
+  | "fabric.solution/v1"
+  | "fabric.iq/v1";
 export type Name = string;
 export type CredentialRef = string;
 export type Host1 = string;
@@ -447,7 +465,8 @@ export type Spec2 =
   | FoundryApplicationSpec
   | SnowflakeApplicationSpec
   | FabricApplicationSpec
-  | FabricIQApplicationSpec;
+  | FabricIQApplicationSpec
+  | FoundryMarketplaceSpec;
 export type Digest2 = string;
 export type Size1 = number;
 export type Digest3 = string;
@@ -462,7 +481,8 @@ export type Spec3 =
   | FoundryApplicationSpec
   | SnowflakeApplicationSpec
   | FabricApplicationSpec
-  | FabricIQApplicationSpec;
+  | FabricIQApplicationSpec
+  | FoundryMarketplaceSpec;
 export type TemplateVersion1 = string;
 export type ApplicationId8 = string;
 export type TargetId5 = string;
@@ -506,7 +526,12 @@ export type Actions = [
   )[]
 ];
 export type ApplicationKinds = (
-  "databricks.app/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1"
+  | "databricks.app/v1"
+  | "snowflake.native-app/v1"
+  | "fabric.solution/v1"
+  | "fabric.iq/v1"
+  | "palantir.marketplace/v1"
+  | "palantir.superrepo/v1"
 )[];
 export type ConnectionIds = string[];
 export type Enabled = boolean;
@@ -526,7 +551,13 @@ export type Action1 =
   | "observe"
   | "reconcile"
   | "verify";
-export type ApplicationKind = "databricks.app/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1";
+export type ApplicationKind =
+  | "databricks.app/v1"
+  | "snowflake.native-app/v1"
+  | "fabric.solution/v1"
+  | "fabric.iq/v1"
+  | "palantir.marketplace/v1"
+  | "palantir.superrepo/v1";
 export type CredentialRef2 = string | null;
 export type Deadline = string;
 export type ExecutionId = string;
@@ -579,6 +610,7 @@ export type Spec4 =
       | SnowflakeApplicationSpec
       | FabricApplicationSpec
       | FabricIQApplicationSpec
+      | FoundryMarketplaceSpec
     )
   | null;
 export type Spec5 =
@@ -588,6 +620,7 @@ export type Spec5 =
       | SnowflakeApplicationSpec
       | FabricApplicationSpec
       | FabricIQApplicationSpec
+      | FoundryMarketplaceSpec
     )
   | null;
 export type Spec6 =
@@ -597,6 +630,7 @@ export type Spec6 =
       | SnowflakeApplicationSpec
       | FabricApplicationSpec
       | FabricIQApplicationSpec
+      | FoundryMarketplaceSpec
     )
   | null;
 
@@ -691,6 +725,19 @@ export interface FabricIQApplicationSpec {
 }
 export interface Bindings1 {
   [k: string]: string;
+}
+export interface FoundryMarketplaceSpec {
+  frontend_asset_path: FrontendAssetPath;
+  frontend_asset_sha256: FrontendAssetSha256;
+  frontend_origin_binding: FrontendOriginBinding;
+  kind: Kind5;
+  marketplace_binding: MarketplaceBinding;
+  namespace_binding: NamespaceBinding;
+  object_type: ObjectType;
+  ontology_binding: OntologyBinding1;
+  parent_folder_binding: ParentFolderBinding;
+  product_binding: ProductBinding1;
+  version_id: VersionId;
 }
 export interface PlanResult {
   result_kind: ResultKind1;
@@ -818,7 +865,7 @@ export interface DeploymentSubmission {
   plan_id: PlanId;
 }
 export interface ApplicationSubmission {
-  kind: Kind5;
+  kind: Kind6;
   name: Name;
 }
 export interface ConnectionSubmission {

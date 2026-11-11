@@ -11,7 +11,7 @@ dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "respx>=0.22,<1", "ruff>=0.11
 package = false
 
 [tool.uv.workspace]
-members = ["packages/contracts", "packages/core", "packages/adapters/databricks", "packages/adapters/snowflake", "packages/adapters/fabric", "packages/sdk_python", "packages/hosted", "apps/api", "apps/control_worker", "apps/mcp", "executors"]
+members = ["packages/contracts", "packages/core", "packages/adapters/databricks", "packages/adapters/snowflake", "packages/adapters/fabric", "packages/adapters/palantir", "packages/sdk_python", "packages/hosted", "apps/api", "apps/control_worker", "apps/mcp", "executors"]
 
 [tool.uv.sources]
 shifde-contracts = { workspace = true }
@@ -19,6 +19,7 @@ shifde-core = { workspace = true }
 shifde-databricks = { workspace = true }
 shifde-snowflake = { workspace = true }
 shifde-fabric = { workspace = true }
+shifde-palantir = { workspace = true }
 shifde-sdk = { workspace = true }
 shifde-hosted = { workspace = true }
 shifde-api = { workspace = true }
@@ -46,4 +47,4 @@ python_version = "3.12"
 check_untyped_defs = true
 ignore_missing_imports = true
 explicit_package_bases = true
-mypy_path = ["packages/contracts/src", "packages/core/src", "packages/adapters/databricks/src", "packages/adapters/snowflake/src", "packages/adapters/fabric/src", "packages/sdk_python/src", "packages/hosted/src", "apps/api/src", "apps/control_worker/src", "apps/mcp/src", "executors/src"]
+mypy_path = ["packages/contracts/src", "packages/core/src", "packages/adapters/databricks/src", "packages/adapters/snowflake/src", "packages/adapters/fabric/src", "packages/adapters/palantir/src", "packages/sdk_python/src", "packages/hosted/src", "apps/api/src", "apps/control_worker/src", "apps/mcp/src", "executors/src"]

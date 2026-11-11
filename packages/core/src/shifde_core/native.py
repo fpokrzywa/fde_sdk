@@ -1,4 +1,6 @@
 TERMINAL_STEPS = {
+    "palantir.marketplace/v1": "palantir-finalize",
+    "palantir.superrepo/v1": "palantir-superrepo-unavailable",
     "databricks.app/v1": "bundle-run",
     "snowflake.native-app/v1": "application-access",
     "fabric.solution/v1": "fabric-finalize",
@@ -13,6 +15,11 @@ SNOWFLAKE_PROFILE = {
 }
 
 FABRIC_PROFILE = {"adapter": "0.1.0", "api": "v1", "packager": "fabric-source/v1"}
+PALANTIR_PROFILE = {
+    "adapter": "0.1.0",
+    "api": "v3-preview",
+    "packager": "palantir-approved-product/v1",
+}
 
 
 def terminal_step(kind: str) -> str:

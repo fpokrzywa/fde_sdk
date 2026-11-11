@@ -74,6 +74,7 @@ class Supervisor:
                     "bearer": handle.bearer.get_secret_value(),
                     **({"snowflake": handle.snowflake} if handle.snowflake else {}),
                     **({"fabric": handle.fabric} if handle.fabric else {}),
+                    **({"palantir": handle.palantir} if handle.palantir else {}),
                 }
             raise PermissionError("unknown executor RPC")
 

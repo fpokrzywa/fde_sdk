@@ -24,6 +24,7 @@ from shifde_contracts.projects import parse_spec
 from shifde_core.fabric_receipts import validate_fabric_receipt
 from shifde_core.hashing import digest
 from shifde_core.native import terminal_step
+from shifde_core.palantir_receipts import validate_palantir_receipt, validate_palantir_step
 from sqlalchemy.dialects.postgresql import insert
 
 from shifde_hosted.auth import Principal
@@ -89,7 +90,11 @@ class ExecutionGateway:
                 )
             )
             application_kind = r.resource(c, tenant, "application", application_id)["data"]["kind"]
-            if action in {"observe", "verify"} and not application_kind.startswith("fabric."):
+            if (
+                action in {"observe", "verify"}
+                and not application_kind.startswith("fabric.")
+                and application_kind != "palantir.marketplace/v1"
+            ):
                 # Older pinned Databricks/Snowflake runners accept the receipt-only wire shape.
                 body.pop("spec", None)
             pools = [
@@ -412,16 +417,27 @@ class ExecutionGateway:
                     "snowflake.native-app/v1",
                     "fabric.solution/v1",
                     "fabric.iq/v1",
+                    "palantir.marketplace/v1",
                 } and request.step != terminal_step(job.application_kind):
                     step_receipt = NativeStepReceipt.model_validate(request.data)
                     fabric = job.application_kind.startswith("fabric.")
-                    if set(step_receipt.handles) - (
-                        {"operation_id", "job_id", "metadata_digest", "definition_digest"}
-                        if fabric
-                        else {"query_id"}
-                    ) or any(
-                        value and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value)
-                        for value in step_receipt.handles.values()
+                    palantir = job.application_kind == "palantir.marketplace/v1"
+                    if palantir:
+                        try:
+                            validate_palantir_step(step_receipt, job.target)
+                        except ValueError:
+                            raise ServiceError("INVALID_NATIVE_RECEIPT", 422) from None
+                    if not palantir and (
+                        set(step_receipt.handles)
+                        - (
+                            {"operation_id", "job_id", "metadata_digest", "definition_digest"}
+                            if fabric
+                            else {"query_id"}
+                        )
+                        or any(
+                            value and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value)
+                            for value in step_receipt.handles.values()
+                        )
                     ):
                         raise ServiceError("INVALID_NATIVE_RECEIPT", 422)
                     if (
@@ -437,7 +453,7 @@ class ExecutionGateway:
                             or binding.target_id != job.target.id
                             or binding.key not in allowed
                             or not binding.resource_type.startswith(
-                                "fabric." if fabric else "snowflake."
+                                "palantir." if palantir else "fabric." if fabric else "snowflake."
                             )
                         ):
                             raise Forbidden()
@@ -499,6 +515,19 @@ class ExecutionGateway:
                 elif request.step == terminal_step(job.application_kind):
                     receipt = ApplyReceipt.model_validate(request.data)
                     artifact = job.request["artifact"]
+                    if job.application_kind == "palantir.marketplace/v1":
+                        try:
+                            from shifde_contracts.plans import DeploymentPlan
+
+                            validate_palantir_receipt(
+                                receipt,
+                                parse_spec(artifact["spec"]),
+                                job.target,
+                                completed=journal.completed,
+                                plan=DeploymentPlan.model_validate(job.request["plan"]),
+                            )
+                        except ValueError:
+                            raise ServiceError("INVALID_NATIVE_RECEIPT", 422) from None
                     if job.application_kind.startswith("fabric."):
                         try:
                             validate_fabric_receipt(

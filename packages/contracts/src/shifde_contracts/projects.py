@@ -6,7 +6,7 @@ from pydantic import Field, TypeAdapter
 from shifde_contracts.common import Entity, SourceArchive
 from shifde_contracts.platform_specs.databricks import DatabricksApplicationSpec
 from shifde_contracts.platform_specs.fabric import FabricApplicationSpec, FabricIQApplicationSpec
-from shifde_contracts.platform_specs.palantir import FoundryApplicationSpec
+from shifde_contracts.platform_specs.palantir import FoundryApplicationSpec, FoundryMarketplaceSpec
 from shifde_contracts.platform_specs.snowflake import SnowflakeApplicationSpec
 
 ApplicationSpec = Annotated[
@@ -14,7 +14,8 @@ ApplicationSpec = Annotated[
     | FoundryApplicationSpec
     | SnowflakeApplicationSpec
     | FabricApplicationSpec
-    | FabricIQApplicationSpec,
+    | FabricIQApplicationSpec
+    | FoundryMarketplaceSpec,
     Field(discriminator="kind"),
 ]
 

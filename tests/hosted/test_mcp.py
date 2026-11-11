@@ -1,3 +1,4 @@
+import json
 import time
 
 import httpx2
@@ -60,6 +61,14 @@ async def test_mcp_http_uses_caller_identity_and_same_idempotent_service(hosted_
                     "get_operation",
                     "platform_schema",
                 } <= {tool.name for tool in tools.tools}
+                foundry_schema = await client.call_tool(
+                    "platform_schema", {"platform": "palantir-marketplace"}
+                )
+                assert not foundry_schema.is_error, foundry_schema.content
+                schema = foundry_schema.structured_content or json.loads(
+                    foundry_schema.content[0].text
+                )
+                assert schema["$ref"] == "#/$defs/FoundryMarketplaceSpec"
                 created = await client.call_tool(
                     "create_application",
                     {"request": {"name": "mcp-app", "kind": "databricks.app/v1"}},

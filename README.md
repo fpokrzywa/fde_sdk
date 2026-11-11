@@ -4,7 +4,7 @@ SHIFDE builds platform-specific applications through a shared delivery lifecycle
 
 The Databricks adapter scaffolds a Python app, packages immutable source, plans changes against native state, deploys a bounded app-only bundle, starts the app, and verifies native status plus an authenticated runtime warehouse check. Local steps and ownership survive process restarts. An uncertain native write stops execution for reconciliation.
 
-Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server, then the [executor operating guide](docs/executor-operations.md) to enroll isolated hosted or outbound-only private workers. Each adapter action runs in a fresh container; production requires dedicated tenant VM hosts and signed digest-pinned images. General hostile-code compilation remains a later milestone. The experimental [Snowflake Native App adapter](docs/snowflake-native-app.md) supports internal packages, versions/patches, installation and in-place upgrades. The experimental [Fabric and Fabric IQ adapters](docs/fabric-adapters.md) deploy Lakehouse, Notebook and Ontology definitions. Palantir remains schema-only.
+Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server, then the [executor operating guide](docs/executor-operations.md) to enroll isolated hosted or outbound-only private workers. Each adapter action runs in a fresh container; production requires dedicated tenant VM hosts and signed digest-pinned images. General hostile-code compilation remains a later milestone. The experimental [Snowflake Native App adapter](docs/snowflake-native-app.md) supports internal packages, versions/patches, installation and in-place upgrades. The experimental [Fabric and Fabric IQ adapters](docs/fabric-adapters.md) deploy Lakehouse, Notebook and Ontology definitions. The experimental [Palantir Foundry adapter](docs/palantir-foundry.md) installs and updates approved, prepublished Marketplace product versions; SuperRepo source publishing remains gated pending enrollment enablement and an approved CLI.
 
 ## Install and verify
 
@@ -40,6 +40,7 @@ packages/core/                  adapter protocol, artifacts, plans, policy and l
 packages/adapters/databricks/   real Databricks SDK/CLI integration and packaged app template
 packages/adapters/snowflake/    Native App package/version/install/upgrade adapter
 packages/adapters/fabric/       Fabric Lakehouse/Notebook and Fabric IQ Ontology adapters
+packages/adapters/palantir/     Approved Marketplace product installation/update; gated SuperRepo
 packages/sdk_python/            validated async HTTP client
 packages/sdk_typescript/        generated types, runtime validation and async HTTP client
 packages/hosted/                PostgreSQL service, authorization, outbox, execution and journals

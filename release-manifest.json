@@ -30,7 +30,10 @@
       "liveValidated": false,
       "apiVersion": "v1",
       "packaging": "fabric-source/v1",
-      "items": ["Lakehouse", "Notebook"]
+      "items": [
+        "Lakehouse",
+        "Notebook"
+      ]
     },
     "fabric.iq/v1": {
       "adapterVersion": "0.1.0",
@@ -40,8 +43,27 @@
       "apiVersion": "v1",
       "packaging": "fabric-source/v1",
       "featureGate": "allow_fabric_iq",
-      "items": ["Lakehouse", "Notebook", "Ontology"]
+      "items": [
+        "Lakehouse",
+        "Notebook",
+        "Ontology"
+      ]
+    },
+    "palantir.marketplace/v1": {
+      "adapterVersion": "0.1.0",
+      "templateVersion": "0.1.0",
+      "maturity": "experimental",
+      "liveValidated": false,
+      "apiVersion": "v3-preview",
+      "featureGate": "allow_marketplace_preview",
+      "packaging": "palantir-approved-product/v1",
+      "profile": "prepublished-pinned-native-product"
     }
   },
-  "schemaOnlyKinds": ["palantir.superrepo/v1"]
+  "schemaOnlyKinds": [
+    "palantir.superrepo/v1"
+  ],
+  "gatedKinds": {
+    "palantir.superrepo/v1": "Requires SuperRepo enrollment enablement and an approved enrollment-distributed CLI"
+  }
 }

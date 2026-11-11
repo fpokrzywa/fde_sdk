@@ -13,6 +13,7 @@ members = [
     "shifde-fabric",
     "shifde-hosted",
     "shifde-mcp",
+    "shifde-palantir",
     "shifde-sdk",
     "shifde-snowflake",
     "shifde-workspace",
@@ -1320,6 +1321,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "shifde-databricks" },
     { name = "shifde-fabric" },
+    { name = "shifde-palantir" },
     { name = "shifde-snowflake" },
 ]
 
@@ -1338,6 +1340,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.8,<3" },
     { name = "shifde-databricks", editable = "packages/adapters/databricks" },
     { name = "shifde-fabric", editable = "packages/adapters/fabric" },
+    { name = "shifde-palantir", editable = "packages/adapters/palantir" },
     { name = "shifde-snowflake", editable = "packages/adapters/snowflake" },
 ]
 provides-extras = ["azure"]
@@ -1406,6 +1409,21 @@ dependencies = [
 requires-dist = [
     { name = "mcp", specifier = ">=2,<3" },
     { name = "shifde-api", editable = "apps/api" },
+]
+
+[[package]]
+name = "shifde-palantir"
+version = "0.1.0"
+source = { editable = "packages/adapters/palantir" }
+dependencies = [
+    { name = "httpx" },
+    { name = "shifde-core" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "shifde-core", editable = "packages/core" },
 ]
 
 [[package]]

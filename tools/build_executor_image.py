@@ -20,6 +20,7 @@ def main():
         "shifde-databricks",
         "shifde-snowflake",
         "shifde-fabric",
+        "shifde-palantir",
         "shifde-executor",
     ):
         subprocess.run(

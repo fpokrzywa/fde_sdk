@@ -114,6 +114,15 @@ class RemoteJournal:
 
 
 def native_adapter(job, rpc):
+    if job.application_kind.startswith("palantir."):
+        from shifde_palantir.adapter import PalantirMarketplaceAdapter, PalantirSuperRepoAdapter
+        from shifde_palantir.clients import PalantirClient
+
+        if job.application_kind == "palantir.superrepo/v1":
+            return PalantirSuperRepoAdapter()
+        return PalantirMarketplaceAdapter(
+            client_factory=lambda target: PalantirClient(target, lambda: rpc.call("credential"))
+        )
     if job.application_kind in {"fabric.solution/v1", "fabric.iq/v1"}:
         from shifde_fabric.adapter import FabricAdapter, FabricIQAdapter
         from shifde_fabric.clients import FabricClient

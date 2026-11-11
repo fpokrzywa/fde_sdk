@@ -8,7 +8,7 @@ from shifde_executor.config import ExecutorSettings, LocalCredentialBinding
 from shifde_executor.credentials import LocalCredentialBroker
 
 
-@pytest.mark.parametrize("platform", ["databricks", "snowflake", "fabric"])
+@pytest.mark.parametrize("platform", ["databricks", "snowflake", "fabric", "palantir"])
 def test_local_broker_resolves_bound_credential_without_serializing_secret(
     tmp_path, monkeypatch, platform
 ):
@@ -55,6 +55,8 @@ def test_local_broker_resolves_bound_credential_without_serializing_secret(
         credential_ref="private",
         application_kind="fabric.solution/v1"
         if platform == "fabric"
+        else "palantir.marketplace/v1"
+        if platform == "palantir"
         else "snowflake.native-app/v1"
         if platform == "snowflake"
         else "databricks.app/v1",

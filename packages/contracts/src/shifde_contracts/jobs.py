@@ -40,7 +40,12 @@ class WorkerPool(Entity):
     enabled: bool = True
     application_kinds: list[
         Literal[
-            "databricks.app/v1", "snowflake.native-app/v1", "fabric.solution/v1", "fabric.iq/v1"
+            "databricks.app/v1",
+            "snowflake.native-app/v1",
+            "fabric.solution/v1",
+            "fabric.iq/v1",
+            "palantir.marketplace/v1",
+            "palantir.superrepo/v1",
         ]
     ] = ["databricks.app/v1"]
 
@@ -48,7 +53,12 @@ class WorkerPool(Entity):
 class ExecutionJob(Entity):
     operation_id: UUID
     application_kind: Literal[
-        "databricks.app/v1", "snowflake.native-app/v1", "fabric.solution/v1", "fabric.iq/v1"
+        "databricks.app/v1",
+        "snowflake.native-app/v1",
+        "fabric.solution/v1",
+        "fabric.iq/v1",
+        "palantir.marketplace/v1",
+        "palantir.superrepo/v1",
     ] = "databricks.app/v1"
     execution_id: UUID
     operation_fence: int = Field(ge=1)

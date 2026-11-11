@@ -5,6 +5,7 @@
       "properties": {
         "kind": {
           "enum": [
+            "palantir.marketplace/v1",
             "databricks.app/v1",
             "palantir.superrepo/v1",
             "snowflake.native-app/v1",
@@ -114,6 +115,7 @@
               "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
               "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
               "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
               "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
               "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
             },
@@ -134,6 +136,9 @@
             },
             {
               "$ref": "#/$defs/FabricIQApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryMarketplaceSpec"
             }
           ],
           "title": "Spec"
@@ -806,7 +811,9 @@
             "databricks.app/v1",
             "snowflake.native-app/v1",
             "fabric.solution/v1",
-            "fabric.iq/v1"
+            "fabric.iq/v1",
+            "palantir.marketplace/v1",
+            "palantir.superrepo/v1"
           ],
           "title": "Application Kind",
           "type": "string"
@@ -1163,6 +1170,87 @@
       "title": "FoundryApplicationSpec",
       "type": "object"
     },
+    "FoundryMarketplaceSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "frontend_asset_path": {
+          "title": "Frontend Asset Path",
+          "type": "string"
+        },
+        "frontend_asset_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Frontend Asset Sha256",
+          "type": "string"
+        },
+        "frontend_origin_binding": {
+          "default": "frontend_origin",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Frontend Origin Binding",
+          "type": "string"
+        },
+        "kind": {
+          "const": "palantir.marketplace/v1",
+          "default": "palantir.marketplace/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "marketplace_binding": {
+          "default": "marketplace",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Marketplace Binding",
+          "type": "string"
+        },
+        "namespace_binding": {
+          "default": "namespace",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Namespace Binding",
+          "type": "string"
+        },
+        "object_type": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.]{0,127}$",
+          "title": "Object Type",
+          "type": "string"
+        },
+        "ontology_binding": {
+          "default": "ontology",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Ontology Binding",
+          "type": "string"
+        },
+        "parent_folder_binding": {
+          "default": "parent_folder",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Parent Folder Binding",
+          "type": "string"
+        },
+        "product_binding": {
+          "default": "product",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+          "title": "Product Binding",
+          "type": "string"
+        },
+        "version_id": {
+          "format": "uuid",
+          "title": "Version Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "version_id",
+        "object_type",
+        "frontend_asset_path",
+        "frontend_asset_sha256",
+        "marketplace_binding",
+        "product_binding",
+        "parent_folder_binding",
+        "namespace_binding",
+        "ontology_binding",
+        "frontend_origin_binding"
+      ],
+      "title": "FoundryMarketplaceSpec",
+      "type": "object"
+    },
     "InspectRequest": {
       "additionalProperties": false,
       "properties": {
@@ -1183,6 +1271,7 @@
                   "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
                   "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
                   "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+                  "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
                   "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
                   "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
                 },
@@ -1203,6 +1292,9 @@
                 },
                 {
                   "$ref": "#/$defs/FabricIQApplicationSpec"
+                },
+                {
+                  "$ref": "#/$defs/FoundryMarketplaceSpec"
                 }
               ]
             },
@@ -1455,6 +1547,7 @@
                   "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
                   "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
                   "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+                  "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
                   "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
                   "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
                 },
@@ -1475,6 +1568,9 @@
                 },
                 {
                   "$ref": "#/$defs/FabricIQApplicationSpec"
+                },
+                {
+                  "$ref": "#/$defs/FoundryMarketplaceSpec"
                 }
               ]
             },
@@ -1784,6 +1880,7 @@
               "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
               "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
               "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
               "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
               "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
             },
@@ -1804,6 +1901,9 @@
             },
             {
               "$ref": "#/$defs/FabricIQApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryMarketplaceSpec"
             }
           ],
           "title": "Spec"
@@ -1844,6 +1944,7 @@
               "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
               "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
               "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
               "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
               "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
             },
@@ -1864,6 +1965,9 @@
             },
             {
               "$ref": "#/$defs/FabricIQApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryMarketplaceSpec"
             }
           ],
           "title": "Spec"
@@ -1947,6 +2051,7 @@
               "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
               "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
               "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+              "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
               "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
               "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
             },
@@ -1967,6 +2072,9 @@
             },
             {
               "$ref": "#/$defs/FabricIQApplicationSpec"
+            },
+            {
+              "$ref": "#/$defs/FoundryMarketplaceSpec"
             }
           ],
           "title": "Spec"
@@ -2361,6 +2469,7 @@
                   "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
                   "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
                   "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
+                  "palantir.marketplace/v1": "#/$defs/FoundryMarketplaceSpec",
                   "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
                   "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
                 },
@@ -2381,6 +2490,9 @@
                 },
                 {
                   "$ref": "#/$defs/FabricIQApplicationSpec"
+                },
+                {
+                  "$ref": "#/$defs/FoundryMarketplaceSpec"
                 }
               ]
             },
@@ -2431,7 +2543,9 @@
               "databricks.app/v1",
               "snowflake.native-app/v1",
               "fabric.solution/v1",
-              "fabric.iq/v1"
+              "fabric.iq/v1",
+              "palantir.marketplace/v1",
+              "palantir.superrepo/v1"
             ],
             "type": "string"
           },

@@ -2,7 +2,7 @@
 name = "shifde-executor"
 version = "0.1.0"
 requires-python = ">=3.12,<3.14"
-dependencies = ["shifde-databricks", "shifde-snowflake", "shifde-fabric", "azure-identity>=1.19,<2", "pydantic-settings>=2.8,<3", "httpx>=0.28,<1"]
+dependencies = ["shifde-databricks", "shifde-snowflake", "shifde-fabric", "shifde-palantir", "azure-identity>=1.19,<2", "pydantic-settings>=2.8,<3", "httpx>=0.28,<1"]
 
 [project.optional-dependencies]
 azure = ["azure-identity>=1.19,<2", "azure-keyvault-secrets>=4.9,<5"]

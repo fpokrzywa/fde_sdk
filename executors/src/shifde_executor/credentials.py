@@ -17,6 +17,7 @@ class CredentialHandle:
     bearer: SecretStr
     snowflake: dict[str, str] | None = None
     fabric: dict[str, Any] | None = None
+    palantir: dict[str, Any] | None = None
 
 
 class LocalCredentialBroker:
@@ -50,7 +51,18 @@ class LocalCredentialBroker:
                 "allow_iq": binding.allow_fabric_iq,
                 "allow_notebook_execution": binding.allow_notebook_execution,
             }
-        return CredentialHandle(SecretStr(bearer), snowflake=profile, fabric=fabric)
+        palantir = None
+        if binding.platform == "palantir":
+            palantir = {
+                "host": binding.host,
+                "allow_marketplace_preview": binding.allow_marketplace_preview,
+                "approved_releases": [
+                    r.model_dump(mode="json") for r in binding.palantir_approved_releases
+                ],
+            }
+        return CredentialHandle(
+            SecretStr(bearer), snowflake=profile, fabric=fabric, palantir=palantir
+        )
 
     def resolve(self, grant: CredentialGrant, job: ExecutionJob) -> CredentialHandle:
         if (
@@ -73,7 +85,9 @@ class LocalCredentialBroker:
         ):
             raise PermissionError("local credential binding is unavailable")
         expected = (
-            "fabric"
+            "palantir"
+            if job.application_kind.startswith("palantir.")
+            else "fabric"
             if job.application_kind in {"fabric.solution/v1", "fabric.iq/v1"}
             else "snowflake"
             if job.application_kind == "snowflake.native-app/v1"
@@ -85,10 +99,50 @@ class LocalCredentialBroker:
             and binding.mode == "oauth_env"
             or expected != "fabric"
             and binding.mode.startswith("azure_")
+            or expected != "palantir"
+            and binding.mode == "palantir_client_credentials"
         ):
             raise PermissionError("credential platform/profile mismatch")
         if job.application_kind == "fabric.iq/v1" and not binding.allow_fabric_iq:
             raise PermissionError("Fabric IQ is disabled for this local credential binding")
+        if binding.mode == "palantir_client_credentials":
+            if (
+                not binding.client_id_env
+                or not binding.client_secret_env
+                or not binding.palantir_scopes
+            ):
+                raise ValueError("Foundry OAuth requires explicit client and scope bindings")
+            import httpx
+
+            with httpx.Client(
+                trust_env=False, follow_redirects=False, timeout=httpx.Timeout(30, connect=5)
+            ) as client:
+                with client.stream(
+                    "POST",
+                    binding.host + "/multipass/api/oauth2/token",
+                    data={
+                        "grant_type": "client_credentials",
+                        "client_id": os.environ[binding.client_id_env],
+                        "client_secret": os.environ[binding.client_secret_env],
+                        "scope": " ".join(binding.palantir_scopes),
+                    },
+                ) as response:
+                    if response.status_code != 200:
+                        raise PermissionError("Foundry OAuth exchange failed")
+                    body = bytearray()
+                    for chunk in response.iter_bytes():
+                        body.extend(chunk)
+                        if len(body) > 65536:
+                            raise ValueError("Foundry OAuth response exceeded budget")
+            import json
+
+            value = json.loads(body)
+            if (
+                value.get("token_type", "").lower() != "bearer"
+                or float(value.get("expires_in", 0)) <= 0
+            ):
+                raise PermissionError("Foundry OAuth token response invalid")
+            return self._handle(grant, value["access_token"], binding)
         if binding.mode.startswith("azure_"):
             from azure.identity import (
                 ClientSecretCredential,

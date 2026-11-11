@@ -225,7 +225,7 @@ def register_tools(server: MCPServer, backend):
 
     @server.tool()
     async def platform_schema(platform: str) -> dict:
-        """Read the native input schema for databricks, palantir, snowflake or fabric."""
+        """Read native specs: databricks, snowflake, fabric, fabric-iq, palantir-marketplace; palantir is gated SuperRepo."""
         return await backend.call("platform_schema", identity=platform)
 
     @server.tool()

@@ -309,6 +309,7 @@ class ApplicationService:
             "snowflake.native-app/v1",
             "fabric.solution/v1",
             "fabric.iq/v1",
+            "palantir.marketplace/v1",
         }:
             latest = c.execute(
                 sa.select(m.resources.c.data)
@@ -530,6 +531,7 @@ class ApplicationService:
             "snowflake": "SnowflakeApplicationSpec",
             "fabric": "FabricApplicationSpec",
             "fabric-iq": "FabricIQApplicationSpec",
+            "palantir-marketplace": "FoundryMarketplaceSpec",
         }
         if platform not in mapping:
             raise ServiceError("UNSUPPORTED_PLATFORM", 404)

@@ -5,13 +5,27 @@ from uuid import UUID
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from shifde_contracts.common import Model, Target
+from shifde_contracts.common import Digest, Model, RelativePath, Target
+
+
+class PalantirReleaseApproval(Model):
+    marketplace: str
+    product: str
+    parent_folder: str
+    namespace: str
+    ontology: str
+    frontend_origin: str
+    version_id: str
+    object_type: str
+    frontend_asset_path: RelativePath
+    frontend_asset_sha256: Digest
+    _origin = field_validator("frontend_origin")(Target._validate_host)
 
 
 class LocalCredentialBinding(Model):
     tenant_id: UUID
     host: str
-    platform: Literal["databricks", "snowflake", "fabric"] = "databricks"
+    platform: Literal["databricks", "snowflake", "fabric", "palantir"] = "databricks"
     mode: Literal[
         "token_env",
         "token_file",
@@ -20,6 +34,7 @@ class LocalCredentialBinding(Model):
         "azure_client_secret",
         "azure_managed_identity",
         "azure_workload_identity",
+        "palantir_client_credentials",
     ]
     token_file: Path | None = None
     snowflake_account: str | None = None
@@ -33,6 +48,9 @@ class LocalCredentialBinding(Model):
     azure_federated_token_file: Path | None = None
     allow_fabric_iq: bool = False
     allow_notebook_execution: bool = False
+    allow_marketplace_preview: bool = False
+    palantir_approved_releases: list[PalantirReleaseApproval] = Field(default_factory=list)
+    palantir_scopes: list[str] = Field(default_factory=list)
     vault_url: str | None = None
     secret_name: str | None = None
     _host = field_validator("host")(Target._validate_host)

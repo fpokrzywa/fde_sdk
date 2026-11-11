@@ -26,7 +26,7 @@ from shifde_contracts.workflow import OperationRef
 from shifde_core.contexts import BuildContext, DeployContext, ReadContext
 from shifde_core.hashing import digest
 from shifde_core.journal import NeedsAttention
-from shifde_core.native import FABRIC_PROFILE, SNOWFLAKE_PROFILE, terminal_step
+from shifde_core.native import FABRIC_PROFILE, PALANTIR_PROFILE, SNOWFLAKE_PROFILE, terminal_step
 from shifde_core.planning import validate_plan
 from sqlalchemy.dialects.postgresql import insert
 
@@ -283,7 +283,9 @@ class OperationExecutor:
             kind, body = row["kind"], row["request"]
         adapter = self.adapter_factory(target)
         toolchain_digest = (
-            digest(FABRIC_PROFILE)
+            digest(PALANTIR_PROFILE)
+            if application_kind.startswith("palantir.")
+            else digest(FABRIC_PROFILE)
             if application_kind in {"fabric.solution/v1", "fabric.iq/v1"}
             else digest(SNOWFLAKE_PROFILE)
             if application_kind == "snowflake.native-app/v1"
