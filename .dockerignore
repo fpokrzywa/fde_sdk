@@ -2,6 +2,7 @@
 !infra/
 !infra/containers/
 !infra/containers/executor.Dockerfile
+!infra/containers/snowflake-cli.requirements.txt
 !.tools/
 !.tools/executor-wheels/
 !.tools/executor-wheels/*.whl

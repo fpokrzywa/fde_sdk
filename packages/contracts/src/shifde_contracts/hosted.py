@@ -17,7 +17,11 @@ from shifde_contracts.operations import Operation
 from shifde_contracts.projects import ApplicationSpec
 
 ApplicationKind = Literal[
-    "databricks.app/v1", "palantir.superrepo/v1", "snowflake.native-app/v1", "fabric.solution/v1"
+    "databricks.app/v1",
+    "palantir.superrepo/v1",
+    "snowflake.native-app/v1",
+    "fabric.solution/v1",
+    "fabric.iq/v1",
 ]
 
 

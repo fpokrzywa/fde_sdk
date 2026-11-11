@@ -32,6 +32,7 @@ from shifde_contracts.projects import Application, Project
 from shifde_contracts.submissions import BuildSubmission, DeploymentSubmission, PlanSubmission
 from shifde_core.artifact_store import ArtifactStore
 from shifde_core.hashing import digest
+from shifde_core.native import TERMINAL_STEPS, terminal_step
 from shifde_core.planning import validate_plan
 from sqlalchemy.dialects.postgresql import insert
 
@@ -90,19 +91,31 @@ class ApplicationService:
             r.authorize(c, actor, "admin")
             if not binding or binding.tenant_id != actor.tenant_id or binding.host != request.host:
                 raise Forbidden()
-            c.execute(
-                insert(m.managed_namespaces)
-                .values(host=request.host, tenant_id=actor.tenant_id)
-                .on_conflict_do_nothing()
-            )
-            owned = c.execute(
-                sa.select(m.managed_namespaces).where(m.managed_namespaces.c.host == request.host)
-            ).first()
-            if not owned:
-                raise ServiceError("NAMESPACE_CONFLICT")
+            if request.host != "https://api.fabric.microsoft.com":
+                self._reserve_namespace(c, actor.tenant_id, request.host)
             model = Connection(tenant_id=actor.tenant_id, **request.model_dump())
             r.put_resource(c, actor.tenant_id, "connection", model)
         return model
+
+    @staticmethod
+    def _reserve_namespace(c, tenant_id, namespace):
+        c.execute(
+            insert(m.managed_namespaces)
+            .values(host=namespace, tenant_id=tenant_id)
+            .on_conflict_do_nothing()
+        )
+        if not c.execute(
+            sa.select(m.managed_namespaces).where(m.managed_namespaces.c.host == namespace)
+        ).first():
+            raise ServiceError("NAMESPACE_CONFLICT")
+
+    def _reserve_fabric_workspace(self, c, tenant_id, target):
+        if target.host == "https://api.fabric.microsoft.com":
+            try:
+                workspace = str(UUID(target.bindings["workspace"]))
+            except (ValueError, KeyError):
+                raise ServiceError("FABRIC_WORKSPACE_BINDING_REQUIRED", 422) from None
+            self._reserve_namespace(c, tenant_id, target.host + "/workspaces/" + workspace)
 
     def create_target(self, actor: Principal, request: TargetSubmission) -> Target:
         with self.database.transaction(actor.tenant_id) as c:
@@ -118,6 +131,7 @@ class ApplicationService:
                 environment=request.environment,
                 bindings=request.bindings,
             )
+            self._reserve_fabric_workspace(c, actor.tenant_id, model)
             r.put_resource(c, actor.tenant_id, "target", model, links={"connection": conn.id})
         return model
 
@@ -152,6 +166,7 @@ class ApplicationService:
             updated = self.target(c, actor.tenant_id, identity).model_copy(
                 update=patch.model_dump(exclude_none=True)
             )
+            self._reserve_fabric_workspace(c, actor.tenant_id, updated)
             r.replace_resource(c, actor.tenant_id, identity, updated)
             return updated, expected_revision + 1
 
@@ -288,8 +303,33 @@ class ApplicationService:
             app = Application.model_validate(
                 r.resource(c, tenant, "application", artifact.application_id)["data"]
             )
-        if app.kind != "databricks.app/v1":
+        if app.kind not in TERMINAL_STEPS:
             raise ServiceError("UNSUPPORTED_APPLICATION_KIND", 422)
+        if isinstance(body, InspectionSubmission) and app.kind in {
+            "snowflake.native-app/v1",
+            "fabric.solution/v1",
+            "fabric.iq/v1",
+        }:
+            latest = c.execute(
+                sa.select(m.resources.c.data)
+                .join(
+                    m.resource_links,
+                    sa.and_(
+                        m.resource_links.c.parent_id == m.resources.c.id,
+                        m.resource_links.c.tenant_id == m.resources.c.tenant_id,
+                    ),
+                )
+                .where(
+                    m.resources.c.kind == "project",
+                    m.resource_links.c.relation == "application",
+                    m.resource_links.c.child_id == app.id,
+                )
+                .order_by(m.resources.c.data["revision"].as_integer().desc())
+                .limit(1)
+            ).scalar()
+            if not latest:
+                raise ServiceError("PROJECT_REQUIRED", 422)
+            refs["project"] = Project.model_validate(latest).id
         if isinstance(body, (InspectionSubmission, PlanSubmission)):
             refs["target"] = self.target(c, tenant, body.target_id).id
         if isinstance(body, DeploymentSubmission):
@@ -489,6 +529,7 @@ class ApplicationService:
             "palantir": "FoundryApplicationSpec",
             "snowflake": "SnowflakeApplicationSpec",
             "fabric": "FabricApplicationSpec",
+            "fabric-iq": "FabricIQApplicationSpec",
         }
         if platform not in mapping:
             raise ServiceError("UNSUPPORTED_PLATFORM", 404)
@@ -524,10 +565,17 @@ class ApplicationService:
         with self.database.transaction(actor.tenant_id) as c:
             row = r.operation(c, actor.tenant_id, identity, lock=True)
             r.authorize(c, actor, "deploy")
+            if row["kind"] != "deployment" or row["state"] != "needs_attention":
+                raise ServiceError("UNPROVEN_NATIVE_OUTCOME")
+            artifact = BuildArtifact.model_validate(
+                r.resource(c, actor.tenant_id, "artifact", UUID(row["request"]["artifact_id"]))[
+                    "data"
+                ]
+            )
             completed = c.execute(
                 sa.select(m.step_journal).where(
                     m.step_journal.c.operation_id == identity,
-                    m.step_journal.c.key == "bundle-run",
+                    m.step_journal.c.key == terminal_step(artifact.spec.kind),
                     m.step_journal.c.state == "complete",
                 )
             ).first()

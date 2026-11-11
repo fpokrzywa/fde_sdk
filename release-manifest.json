@@ -12,7 +12,36 @@
       "windowsAmd64ArchiveSha256": "2f2555cb9a82ce8f892ac77d47d68f03c8ace405ff3d5d41d4b4bf5588f8f79e",
       "releaseUrl": "https://github.com/databricks/cli/releases/tag/v1.25.0",
       "packaging": "validated-source-archive"
+    },
+    "snowflake.native-app/v1": {
+      "adapterVersion": "0.1.0",
+      "templateVersion": "0.1.0",
+      "maturity": "experimental",
+      "liveValidated": false,
+      "snowflakeConnector": "5.2.0",
+      "snowflakeCli": "3.33.0",
+      "packaging": "snowflake-managed-source/v1",
+      "profile": "internal-provider-account-explicit-versions"
+    },
+    "fabric.solution/v1": {
+      "adapterVersion": "0.1.0",
+      "templateVersion": "0.1.0",
+      "maturity": "experimental",
+      "liveValidated": false,
+      "apiVersion": "v1",
+      "packaging": "fabric-source/v1",
+      "items": ["Lakehouse", "Notebook"]
+    },
+    "fabric.iq/v1": {
+      "adapterVersion": "0.1.0",
+      "templateVersion": "0.1.0",
+      "maturity": "experimental",
+      "liveValidated": false,
+      "apiVersion": "v1",
+      "packaging": "fabric-source/v1",
+      "featureGate": "allow_fabric_iq",
+      "items": ["Lakehouse", "Notebook", "Ontology"]
     }
   },
-  "schemaOnlyKinds": ["palantir.superrepo/v1", "snowflake.native-app/v1", "fabric.solution/v1"]
+  "schemaOnlyKinds": ["palantir.superrepo/v1"]
 }

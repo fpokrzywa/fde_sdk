@@ -8,9 +8,18 @@ from shifde_executor.config import ExecutorSettings, LocalCredentialBinding
 from shifde_executor.credentials import LocalCredentialBroker
 
 
-def test_local_broker_resolves_bound_credential_without_serializing_secret(tmp_path, monkeypatch):
+@pytest.mark.parametrize("platform", ["databricks", "snowflake", "fabric"])
+def test_local_broker_resolves_bound_credential_without_serializing_secret(
+    tmp_path, monkeypatch, platform
+):
     tenant, pool, worker = uuid4(), uuid4(), uuid4()
-    target = Target(tenant_id=tenant, connection_id=uuid4(), host="https://workspace.example")
+    target = Target(
+        tenant_id=tenant,
+        connection_id=uuid4(),
+        host="https://api.fabric.microsoft.com"
+        if platform == "fabric"
+        else "https://workspace.example",
+    )
     settings = ExecutorSettings(
         gateway_url="https://delivery.test",
         token_file=tmp_path / "identity",
@@ -25,6 +34,9 @@ def test_local_broker_resolves_bound_credential_without_serializing_secret(tmp_p
                 host=target.host,
                 mode="token_env",
                 token_env="TEST_LOCAL_NATIVE_TOKEN",
+                platform=platform,
+                snowflake_account="ACCOUNT" if platform == "snowflake" else None,
+                snowflake_role="DEPLOY_ROLE" if platform == "snowflake" else None,
             )
         },
     )
@@ -41,6 +53,11 @@ def test_local_broker_resolves_bound_credential_without_serializing_secret(tmp_p
         toolchain_digest="a" * 64,
         deadline=utcnow() + timedelta(minutes=5),
         credential_ref="private",
+        application_kind="fabric.solution/v1"
+        if platform == "fabric"
+        else "snowflake.native-app/v1"
+        if platform == "snowflake"
+        else "databricks.app/v1",
     )
     grant = CredentialGrant(
         tenant_id=tenant,
@@ -61,6 +78,27 @@ def test_local_broker_resolves_bound_credential_without_serializing_secret(tmp_p
     handle = LocalCredentialBroker(settings).resolve(grant, job)
     assert handle.bearer.get_secret_value() == "secret-native-only-local"
     assert "secret-native-only-local" not in repr(handle)
+    wrong_kind = "databricks.app/v1" if platform == "snowflake" else "snowflake.native-app/v1"
+    with pytest.raises(PermissionError):
+        LocalCredentialBroker(settings).resolve(
+            grant, job.model_copy(update={"application_kind": wrong_kind})
+        )
+    if platform == "snowflake":
+        token_file = tmp_path / "native-oauth"
+        token_file.write_text("rotated-one")
+        binding = settings.credential_bindings["private"].model_copy(
+            update={"mode": "token_file", "token_file": token_file, "token_env": None}
+        )
+        local = settings.model_copy(update={"credential_bindings": {"private": binding}})
+        assert (
+            LocalCredentialBroker(local).resolve(grant, job).bearer.get_secret_value()
+            == "rotated-one"
+        )
+        token_file.write_text("rotated-two")
+        assert (
+            LocalCredentialBroker(local).resolve(grant, job).bearer.get_secret_value()
+            == "rotated-two"
+        )
     assert (
         "secret-native-only-local"
         not in grant.model_dump_json() + job.model_dump_json() + settings.model_dump_json()

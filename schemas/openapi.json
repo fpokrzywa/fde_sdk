@@ -40,7 +40,8 @@
               "databricks.app/v1",
               "palantir.superrepo/v1",
               "snowflake.native-app/v1",
-              "fabric.solution/v1"
+              "fabric.solution/v1",
+              "fabric.iq/v1"
             ],
             "title": "Kind",
             "type": "string"
@@ -88,6 +89,7 @@
             "discriminator": {
               "mapping": {
                 "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Output",
+                "fabric.iq/v1": "#/components/schemas/FabricIQApplicationSpec-Output",
                 "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Output",
                 "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Output",
                 "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Output"
@@ -106,6 +108,9 @@
               },
               {
                 "$ref": "#/components/schemas/FabricApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FabricIQApplicationSpec-Output"
               }
             ],
             "title": "Spec"
@@ -849,6 +854,17 @@
             "title": "Action",
             "type": "string"
           },
+          "application_kind": {
+            "default": "databricks.app/v1",
+            "enum": [
+              "databricks.app/v1",
+              "snowflake.native-app/v1",
+              "fabric.solution/v1",
+              "fabric.iq/v1"
+            ],
+            "title": "Application Kind",
+            "type": "string"
+          },
           "credential_ref": {
             "anyOf": [
               {
@@ -947,6 +963,7 @@
           "id",
           "tenant_id",
           "operation_id",
+          "application_kind",
           "execution_id",
           "operation_fence",
           "pool_id",
@@ -978,6 +995,7 @@
             "items": {
               "$ref": "#/components/schemas/FabricItem-Input"
             },
+            "maxItems": 16,
             "minItems": 1,
             "title": "Items",
             "type": "array"
@@ -991,6 +1009,24 @@
           "solution_root": {
             "default": ".",
             "title": "Solution Root",
+            "type": "string"
+          },
+          "verification_notebook": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification Notebook"
+          },
+          "workspace_binding": {
+            "const": "workspace",
+            "default": "workspace",
+            "title": "Workspace Binding",
             "type": "string"
           }
         },
@@ -1014,6 +1050,7 @@
             "items": {
               "$ref": "#/components/schemas/FabricItem-Output"
             },
+            "maxItems": 16,
             "minItems": 1,
             "title": "Items",
             "type": "array"
@@ -1028,15 +1065,150 @@
             "default": ".",
             "title": "Solution Root",
             "type": "string"
+          },
+          "verification_notebook": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification Notebook"
+          },
+          "workspace_binding": {
+            "const": "workspace",
+            "default": "workspace",
+            "title": "Workspace Binding",
+            "type": "string"
           }
         },
         "required": [
-          "kind",
           "solution_root",
           "items",
-          "bindings"
+          "bindings",
+          "workspace_binding",
+          "verification_notebook",
+          "kind"
         ],
         "title": "FabricApplicationSpec",
+        "type": "object"
+      },
+      "FabricIQApplicationSpec-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FabricItem-Input"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "const": "fabric.iq/v1",
+            "default": "fabric.iq/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "solution_root": {
+            "default": ".",
+            "title": "Solution Root",
+            "type": "string"
+          },
+          "verification_notebook": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification Notebook"
+          },
+          "workspace_binding": {
+            "const": "workspace",
+            "default": "workspace",
+            "title": "Workspace Binding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "FabricIQApplicationSpec",
+        "type": "object"
+      },
+      "FabricIQApplicationSpec-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "bindings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "object"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FabricItem-Output"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "const": "fabric.iq/v1",
+            "default": "fabric.iq/v1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "solution_root": {
+            "default": ".",
+            "title": "Solution Root",
+            "type": "string"
+          },
+          "verification_notebook": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification Notebook"
+          },
+          "workspace_binding": {
+            "const": "workspace",
+            "default": "workspace",
+            "title": "Workspace Binding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "solution_root",
+          "items",
+          "bindings",
+          "workspace_binding",
+          "verification_notebook",
+          "kind"
+        ],
+        "title": "FabricIQApplicationSpec",
         "type": "object"
       },
       "FabricItem-Input": {
@@ -1057,7 +1229,8 @@
           "item_type": {
             "enum": [
               "Lakehouse",
-              "Notebook"
+              "Notebook",
+              "Ontology"
             ],
             "title": "Item Type",
             "type": "string"
@@ -1066,6 +1239,30 @@
             "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
             "title": "Key",
             "type": "string"
+          },
+          "lakehouse": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lakehouse"
+          },
+          "name_binding": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Binding"
           }
         },
         "required": [
@@ -1094,7 +1291,8 @@
           "item_type": {
             "enum": [
               "Lakehouse",
-              "Notebook"
+              "Notebook",
+              "Ontology"
             ],
             "title": "Item Type",
             "type": "string"
@@ -1103,13 +1301,39 @@
             "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
             "title": "Key",
             "type": "string"
+          },
+          "lakehouse": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lakehouse"
+          },
+          "name_binding": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Binding"
           }
         },
         "required": [
           "key",
           "item_type",
           "definition_path",
-          "depends_on"
+          "depends_on",
+          "name_binding",
+          "lakehouse"
         ],
         "title": "FabricItem",
         "type": "object"
@@ -1678,6 +1902,7 @@
             "discriminator": {
               "mapping": {
                 "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Output",
+                "fabric.iq/v1": "#/components/schemas/FabricIQApplicationSpec-Output",
                 "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Output",
                 "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Output",
                 "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Output"
@@ -1696,6 +1921,9 @@
               },
               {
                 "$ref": "#/components/schemas/FabricApplicationSpec-Output"
+              },
+              {
+                "$ref": "#/components/schemas/FabricIQApplicationSpec-Output"
               }
             ],
             "title": "Spec"
@@ -1734,6 +1962,7 @@
             "discriminator": {
               "mapping": {
                 "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Input",
+                "fabric.iq/v1": "#/components/schemas/FabricIQApplicationSpec-Input",
                 "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Input",
                 "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Input",
                 "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Input"
@@ -1752,6 +1981,9 @@
               },
               {
                 "$ref": "#/components/schemas/FabricApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FabricIQApplicationSpec-Input"
               }
             ],
             "title": "Spec"
@@ -1833,6 +2065,7 @@
             "discriminator": {
               "mapping": {
                 "databricks.app/v1": "#/components/schemas/DatabricksApplicationSpec-Input",
+                "fabric.iq/v1": "#/components/schemas/FabricIQApplicationSpec-Input",
                 "fabric.solution/v1": "#/components/schemas/FabricApplicationSpec-Input",
                 "palantir.superrepo/v1": "#/components/schemas/FoundryApplicationSpec-Input",
                 "snowflake.native-app/v1": "#/components/schemas/SnowflakeApplicationSpec-Input"
@@ -1851,6 +2084,9 @@
               },
               {
                 "$ref": "#/components/schemas/FabricApplicationSpec-Input"
+              },
+              {
+                "$ref": "#/components/schemas/FabricIQApplicationSpec-Input"
               }
             ],
             "title": "Spec"
@@ -1894,12 +2130,13 @@
           },
           "release_patch": {
             "default": 0,
+            "maximum": 129.0,
             "minimum": 0.0,
             "title": "Release Patch",
             "type": "integer"
           },
           "release_version": {
-            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,29}$",
             "title": "Release Version",
             "type": "string"
           },
@@ -1944,12 +2181,13 @@
           },
           "release_patch": {
             "default": 0,
+            "maximum": 129.0,
             "minimum": 0.0,
             "title": "Release Patch",
             "type": "integer"
           },
           "release_version": {
-            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,29}$",
             "title": "Release Version",
             "type": "string"
           },

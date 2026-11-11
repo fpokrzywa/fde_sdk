@@ -1,0 +1,9 @@
+{
+  "kind": "fabric.iq/v1",
+  "items": [
+    {"key":"lake","item_type":"Lakehouse","definition_path":"lake.json"},
+    {"key":"notebook","item_type":"Notebook","definition_path":"main.ipynb","depends_on":["lake"],"lakehouse":"lake"},
+    {"key":"ontology","item_type":"Ontology","definition_path":"ontology","depends_on":["lake"]}
+  ],
+  "verification_notebook": null
+}

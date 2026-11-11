@@ -56,6 +56,7 @@
           "items": {
             "$ref": "#/$defs/FabricItem"
           },
+          "maxItems": 16,
           "minItems": 1,
           "title": "Items",
           "type": "array"
@@ -70,12 +71,87 @@
           "default": ".",
           "title": "Solution Root",
           "type": "string"
+        },
+        "verification_notebook": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Notebook"
+        },
+        "workspace_binding": {
+          "const": "workspace",
+          "default": "workspace",
+          "title": "Workspace Binding",
+          "type": "string"
         }
       },
       "required": [
         "items"
       ],
       "title": "FabricApplicationSpec",
+      "type": "object"
+    },
+    "FabricIQApplicationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Bindings",
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/FabricItem"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "kind": {
+          "const": "fabric.iq/v1",
+          "default": "fabric.iq/v1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "solution_root": {
+          "default": ".",
+          "title": "Solution Root",
+          "type": "string"
+        },
+        "verification_notebook": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Notebook"
+        },
+        "workspace_binding": {
+          "const": "workspace",
+          "default": "workspace",
+          "title": "Workspace Binding",
+          "type": "string"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "FabricIQApplicationSpec",
       "type": "object"
     },
     "FabricItem": {
@@ -96,7 +172,8 @@
         "item_type": {
           "enum": [
             "Lakehouse",
-            "Notebook"
+            "Notebook",
+            "Ontology"
           ],
           "title": "Item Type",
           "type": "string"
@@ -105,6 +182,32 @@
           "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
           "title": "Key",
           "type": "string"
+        },
+        "lakehouse": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lakehouse"
+        },
+        "name_binding": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name Binding"
         }
       },
       "required": [
@@ -183,12 +286,13 @@
         },
         "release_patch": {
           "default": 0,
+          "maximum": 129,
           "minimum": 0,
           "title": "Release Patch",
           "type": "integer"
         },
         "release_version": {
-          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,29}$",
           "title": "Release Version",
           "type": "string"
         },
@@ -211,6 +315,7 @@
   "discriminator": {
     "mapping": {
       "databricks.app/v1": "#/$defs/DatabricksApplicationSpec",
+      "fabric.iq/v1": "#/$defs/FabricIQApplicationSpec",
       "fabric.solution/v1": "#/$defs/FabricApplicationSpec",
       "palantir.superrepo/v1": "#/$defs/FoundryApplicationSpec",
       "snowflake.native-app/v1": "#/$defs/SnowflakeApplicationSpec"
@@ -229,6 +334,9 @@
     },
     {
       "$ref": "#/$defs/FabricApplicationSpec"
+    },
+    {
+      "$ref": "#/$defs/FabricIQApplicationSpec"
     }
   ]
 }

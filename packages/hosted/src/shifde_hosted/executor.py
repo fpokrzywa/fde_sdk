@@ -20,10 +20,13 @@ from shifde_contracts.operations import (
     ValidationResult,
 )
 from shifde_contracts.plans import DeploymentPlan, InspectRequest, PlanRequest
+from shifde_contracts.platform_specs.snowflake import SnowflakeApplicationSpec
 from shifde_contracts.projects import Project
 from shifde_contracts.workflow import OperationRef
 from shifde_core.contexts import BuildContext, DeployContext, ReadContext
+from shifde_core.hashing import digest
 from shifde_core.journal import NeedsAttention
+from shifde_core.native import FABRIC_PROFILE, SNOWFLAKE_PROFILE, terminal_step
 from shifde_core.planning import validate_plan
 from sqlalchemy.dialects.postgresql import insert
 
@@ -177,6 +180,9 @@ class OperationExecutor:
                 if not approved["approve"]:
                     return "terminal"
             refs = self._refs(c, row)
+            application_kind = r.resource(c, tenant, "application", refs["application"])["data"][
+                "kind"
+            ]
             target = self.service.target(c, tenant, refs["target"]) if "target" in refs else None
             artifact = (
                 BuildArtifact.model_validate(
@@ -205,7 +211,7 @@ class OperationExecutor:
                 saved = c.execute(
                     sa.select(m.step_journal.c.receipt).where(
                         m.step_journal.c.operation_id == identity,
-                        m.step_journal.c.key == "bundle-run",
+                        m.step_journal.c.key == terminal_step(artifact.spec.kind),
                         m.step_journal.c.state == "complete",
                     )
                 ).scalar()
@@ -276,12 +282,19 @@ class OperationExecutor:
             deadline = row["deadline"]
             kind, body = row["kind"], row["request"]
         adapter = self.adapter_factory(target)
+        toolchain_digest = (
+            digest(FABRIC_PROFILE)
+            if application_kind in {"fabric.solution/v1", "fabric.iq/v1"}
+            else digest(SNOWFLAKE_PROFILE)
+            if application_kind == "snowflake.native-app/v1"
+            else self.toolchain_digest
+        )
         build_context = BuildContext(
             tenant_id=tenant,
             operation_id=identity,
             artifacts=self.service.artifacts,
             workspace=self.service.artifacts.root / "build" / str(identity),
-            toolchain_digest=self.toolchain_digest,
+            toolchain_digest=toolchain_digest,
         )
         read_context = (
             ReadContext(
@@ -315,7 +328,7 @@ class OperationExecutor:
                     deadline=deadline,
                     artifacts=self.service.artifacts,
                     journal=journal,
-                    toolchain_digest=self.toolchain_digest,
+                    toolchain_digest=toolchain_digest,
                     write_guard=journal.guard,
                 )
                 receipt = await adapter.apply(ApplyRequest(artifact=artifact, plan=plan), context)
@@ -397,7 +410,11 @@ class OperationExecutor:
                 value=await adapter.inspect(
                     InspectRequest(
                         application_id=refs["application"],
-                        app_name=app_name(refs["application"], target.id),
+                        app_name=target.bindings[project.spec.application_binding]
+                        if project is not None
+                        and isinstance(project.spec, SnowflakeApplicationSpec)
+                        else app_name(refs["application"], target.id),
+                        spec=project.spec if project is not None else None,
                     ),
                     read_context,
                 )
@@ -454,6 +471,9 @@ class OperationExecutor:
             receipt = ApplyReceipt.model_validate(
                 r.resource(c, tenant, "receipt", refs["receipt"])["data"]
             )
+            artifact = BuildArtifact.model_validate(
+                r.resource(c, tenant, "artifact", refs["artifact"])["data"]
+            )
             target = self.service.target(c, tenant, receipt.target_id)
             context = ReadContext(
                 tenant_id=tenant,
@@ -464,12 +484,16 @@ class OperationExecutor:
             )
             execution_id = row["execution_id"]
         adapter = self.adapter_factory(target)
-        observed = await adapter.observe(ObserveRequest(receipt=receipt), context)
+        observed = await adapter.observe(
+            ObserveRequest(receipt=receipt, spec=artifact.spec), context
+        )
         if observed.state in ("running", "unknown"):
             return "submitted"
         healthy = False
         if observed.state == "succeeded" and not row["cancel_requested"]:
-            healthy = (await adapter.verify(VerifyRequest(receipt=receipt), context)).passed
+            healthy = (
+                await adapter.verify(VerifyRequest(receipt=receipt, spec=artifact.spec), context)
+            ).passed
         with self.database.transaction(tenant) as c:
             current = r.operation(c, tenant, identity, lock=True)
             if current["execution_id"] != execution_id or current["state"] in r.TERMINAL:

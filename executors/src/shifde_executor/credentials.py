@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlsplit
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.core import Config
@@ -14,6 +15,8 @@ from shifde_contracts.jobs import CredentialGrant, ExecutionJob
 @dataclass(frozen=True)
 class CredentialHandle:
     bearer: SecretStr
+    snowflake: dict[str, str] | None = None
+    fabric: dict[str, Any] | None = None
 
 
 class LocalCredentialBroker:
@@ -21,12 +24,33 @@ class LocalCredentialBroker:
         self.settings = settings
 
     @staticmethod
-    def _handle(grant, bearer):
+    def _handle(grant, bearer, binding):
         if grant.expires_at <= utcnow():
             raise PermissionError("credential grant expired during resolution")
         if not bearer:
             raise ValueError("credential is unavailable")
-        return CredentialHandle(SecretStr(bearer))
+        profile = None
+        if binding.platform == "snowflake":
+            host = urlsplit(binding.host).hostname
+            if not binding.snowflake_account or not binding.snowflake_role or not host:
+                raise ValueError("Snowflake local profile requires account and role")
+            profile = {
+                "host": host,
+                "account": binding.snowflake_account,
+                "role": binding.snowflake_role,
+            }
+            if binding.snowflake_user:
+                profile["user"] = binding.snowflake_user
+        fabric = None
+        if binding.platform == "fabric":
+            if binding.host != "https://api.fabric.microsoft.com":
+                raise ValueError("Fabric requires its canonical API origin")
+            fabric = {
+                "host": binding.host,
+                "allow_iq": binding.allow_fabric_iq,
+                "allow_notebook_execution": binding.allow_notebook_execution,
+            }
+        return CredentialHandle(SecretStr(bearer), snowflake=profile, fabric=fabric)
 
     def resolve(self, grant: CredentialGrant, job: ExecutionJob) -> CredentialHandle:
         if (
@@ -48,19 +72,80 @@ class LocalCredentialBroker:
             or binding.host != grant.audience
         ):
             raise PermissionError("local credential binding is unavailable")
+        expected = (
+            "fabric"
+            if job.application_kind in {"fabric.solution/v1", "fabric.iq/v1"}
+            else "snowflake"
+            if job.application_kind == "snowflake.native-app/v1"
+            else "databricks"
+        )
+        if (
+            binding.platform != expected
+            or expected != "databricks"
+            and binding.mode == "oauth_env"
+            or expected != "fabric"
+            and binding.mode.startswith("azure_")
+        ):
+            raise PermissionError("credential platform/profile mismatch")
+        if job.application_kind == "fabric.iq/v1" and not binding.allow_fabric_iq:
+            raise PermissionError("Fabric IQ is disabled for this local credential binding")
+        if binding.mode.startswith("azure_"):
+            from azure.identity import (
+                ClientSecretCredential,
+                ManagedIdentityCredential,
+                WorkloadIdentityCredential,
+            )
+
+            credential: Any
+            if binding.mode == "azure_managed_identity":
+                credential = (
+                    ManagedIdentityCredential(client_id=str(binding.azure_client_id))
+                    if binding.azure_client_id
+                    else ManagedIdentityCredential()
+                )
+            else:
+                if not binding.azure_tenant_id or not binding.azure_client_id:
+                    raise ValueError("Azure authentication requires explicit tenant/client IDs")
+                if binding.mode == "azure_client_secret":
+                    if not binding.client_secret_env:
+                        raise ValueError("Azure client secret environment binding is missing")
+                    credential = ClientSecretCredential(
+                        str(binding.azure_tenant_id),
+                        str(binding.azure_client_id),
+                        os.environ[binding.client_secret_env],
+                    )
+                else:
+                    if not binding.azure_federated_token_file:
+                        raise ValueError("Azure federated token file is missing")
+                    credential = WorkloadIdentityCredential(
+                        tenant_id=str(binding.azure_tenant_id),
+                        client_id=str(binding.azure_client_id),
+                        token_file_path=str(binding.azure_federated_token_file),
+                    )
+            with credential:
+                token = credential.get_token("https://api.fabric.microsoft.com/.default")
+            if token.expires_on <= utcnow().timestamp():
+                raise PermissionError("Azure access token is expired")
+            return self._handle(grant, token.token, binding)
         options: dict[str, Any] = {
             "host": binding.host,
             "http_timeout_seconds": 30,
             "retry_timeout_seconds": 10,
             "debug_headers": False,
         }
+        if binding.mode == "token_file":
+            if binding.token_file is None:
+                raise ValueError("credential binding is incomplete")
+            return self._handle(
+                grant, binding.token_file.read_text(encoding="utf-8").strip(), binding
+            )
         if binding.mode == "token_env":
             if not binding.token_env:
                 raise ValueError("credential binding is incomplete")
             value = os.environ[binding.token_env]
             if not value:
                 raise ValueError("credential is unavailable")
-            return self._handle(grant, value)
+            return self._handle(grant, value, binding)
         elif binding.mode == "oauth_env":
             if not binding.client_id_env or not binding.client_secret_env:
                 raise ValueError("credential binding is incomplete")
@@ -88,10 +173,10 @@ class LocalCredentialBroker:
                 value = vault.get_secret(binding.secret_name).value
             if not value:
                 raise ValueError("credential is unavailable")
-            return self._handle(grant, value)
+            return self._handle(grant, value, binding)
         # SDK handles OAuth expiry/refresh. A new resolution occurs at each header request.
         headers = WorkspaceClient(config=Config(**options)).config.authenticate()
         authorization = headers.get("Authorization", "")
         if not authorization.startswith("Bearer "):
             raise ValueError("native authentication is unavailable")
-        return self._handle(grant, authorization.removeprefix("Bearer "))
+        return self._handle(grant, authorization.removeprefix("Bearer "), binding)

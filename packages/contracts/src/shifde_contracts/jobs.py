@@ -38,10 +38,18 @@ class WorkerPool(Entity):
     actions: list[ExecutionAction] = Field(min_length=1)
     connection_ids: list[UUID] = Field(default_factory=list)
     enabled: bool = True
+    application_kinds: list[
+        Literal[
+            "databricks.app/v1", "snowflake.native-app/v1", "fabric.solution/v1", "fabric.iq/v1"
+        ]
+    ] = ["databricks.app/v1"]
 
 
 class ExecutionJob(Entity):
     operation_id: UUID
+    application_kind: Literal[
+        "databricks.app/v1", "snowflake.native-app/v1", "fabric.solution/v1", "fabric.iq/v1"
+    ] = "databricks.app/v1"
     execution_id: UUID
     operation_fence: int = Field(ge=1)
     pool_id: UUID

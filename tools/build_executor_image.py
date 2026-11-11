@@ -14,7 +14,14 @@ def main():
     args = parser.parse_args()
     output = Path(".tools/executor-wheels")
     output.mkdir(parents=True, exist_ok=True)
-    for package in ("shifde-contracts", "shifde-core", "shifde-databricks", "shifde-executor"):
+    for package in (
+        "shifde-contracts",
+        "shifde-core",
+        "shifde-databricks",
+        "shifde-snowflake",
+        "shifde-fabric",
+        "shifde-executor",
+    ):
         subprocess.run(
             [
                 "uv",

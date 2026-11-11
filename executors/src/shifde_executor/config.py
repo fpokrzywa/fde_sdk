@@ -11,10 +11,28 @@ from shifde_contracts.common import Model, Target
 class LocalCredentialBinding(Model):
     tenant_id: UUID
     host: str
-    mode: Literal["token_env", "oauth_env", "key_vault"]
+    platform: Literal["databricks", "snowflake", "fabric"] = "databricks"
+    mode: Literal[
+        "token_env",
+        "token_file",
+        "oauth_env",
+        "key_vault",
+        "azure_client_secret",
+        "azure_managed_identity",
+        "azure_workload_identity",
+    ]
+    token_file: Path | None = None
+    snowflake_account: str | None = None
+    snowflake_role: str | None = None
+    snowflake_user: str | None = None
     token_env: str | None = None
     client_id_env: str | None = None
     client_secret_env: str | None = None
+    azure_tenant_id: UUID | None = None
+    azure_client_id: UUID | None = None
+    azure_federated_token_file: Path | None = None
+    allow_fabric_iq: bool = False
+    allow_notebook_execution: bool = False
     vault_url: str | None = None
     secret_name: str | None = None
     _host = field_validator("host")(Target._validate_host)

@@ -5,6 +5,7 @@ from pydantic import Field, JsonValue
 
 from shifde_contracts.builds import BuildArtifact
 from shifde_contracts.common import Digest, Entity, Model, ResourceBinding, Timestamp, utcnow
+from shifde_contracts.projects import ApplicationSpec
 
 
 class EnvironmentSnapshot(Model):
@@ -45,3 +46,4 @@ class PlanRequest(Model):
 class InspectRequest(Model):
     application_id: UUID
     app_name: str
+    spec: ApplicationSpec | None = None

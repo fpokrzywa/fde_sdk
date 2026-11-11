@@ -70,7 +70,11 @@ class Supervisor:
             if method == "credential":
                 grant = self.client.grant(lease)
                 handle = self.broker.resolve(grant, job)
-                return {"bearer": handle.bearer.get_secret_value()}
+                return {
+                    "bearer": handle.bearer.get_secret_value(),
+                    **({"snowflake": handle.snowflake} if handle.snowflake else {}),
+                    **({"fabric": handle.fabric} if handle.fabric else {}),
+                }
             raise PermissionError("unknown executor RPC")
 
         thread = threading.Thread(target=heartbeat, daemon=True)

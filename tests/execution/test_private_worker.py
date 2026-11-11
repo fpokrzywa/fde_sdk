@@ -130,9 +130,9 @@ def outbound_setup(gateway_setup, tmp_path, monkeypatch):
         client.close()
 
 
-async def drive(supervisor, function, ref):
+async def drive(supervisor, function, ref, *, timeout=30):
     task = asyncio.create_task(asyncio.to_thread(function, ref))
-    async with asyncio.timeout(30):
+    async with asyncio.timeout(timeout):
         while not task.done():
             await asyncio.to_thread(supervisor.run_once)
             await asyncio.sleep(0.01)

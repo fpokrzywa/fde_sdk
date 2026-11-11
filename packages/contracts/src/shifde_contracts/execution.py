@@ -6,6 +6,7 @@ from pydantic import Field
 from shifde_contracts.builds import BuildArtifact
 from shifde_contracts.common import Digest, Entity, Model, ResourceBinding
 from shifde_contracts.plans import DeploymentPlan
+from shifde_contracts.projects import ApplicationSpec
 
 
 class ApplyRequest(Model):
@@ -23,6 +24,7 @@ class ApplyReceipt(Entity):
 
 class ObserveRequest(Model):
     receipt: ApplyReceipt
+    spec: ApplicationSpec | None = None
 
 
 class ReconcileRequest(Model):
@@ -31,6 +33,7 @@ class ReconcileRequest(Model):
 
 class VerifyRequest(Model):
     receipt: ApplyReceipt
+    spec: ApplicationSpec | None = None
 
 
 class NativeObservation(Model):

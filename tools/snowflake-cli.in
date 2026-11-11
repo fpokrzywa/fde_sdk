@@ -1,0 +1,2 @@
+# Isolated vendor toolchain; intentionally separate from the SDK runtime.
+snowflake-cli==3.33.0

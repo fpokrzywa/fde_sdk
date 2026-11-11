@@ -7,8 +7,9 @@ from datetime import timedelta
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
+from shifde_contracts.checkpoints import NativeStepReceipt
 from shifde_contracts.common import SourceArchive, utcnow
-from shifde_contracts.execution import ApplyReceipt
+from shifde_contracts.execution import ApplyReceipt, Deployment
 from shifde_contracts.hosted import Connection
 from shifde_contracts.jobs import (
     CheckpointSubmission,
@@ -19,7 +20,11 @@ from shifde_contracts.jobs import (
     LeaseRequest,
     WorkerPool,
 )
+from shifde_contracts.projects import parse_spec
+from shifde_core.fabric_receipts import validate_fabric_receipt
 from shifde_core.hashing import digest
+from shifde_core.native import terminal_step
+from sqlalchemy.dialects.postgresql import insert
 
 from shifde_hosted.auth import Principal
 from shifde_hosted.errors import Forbidden, ServiceError
@@ -77,6 +82,16 @@ class ExecutionGateway:
             op = r.operation(c, tenant, ctx.operation_id, lock=True)
             if op["state"] != "running" or op["deadline"] <= utcnow():
                 raise ServiceError("OPERATION_NOT_RUNNING")
+            application_id = c.scalar(
+                sa.select(m.operation_links.c.resource_id).where(
+                    m.operation_links.c.operation_id == op["id"],
+                    m.operation_links.c.relation == "application",
+                )
+            )
+            application_kind = r.resource(c, tenant, "application", application_id)["data"]["kind"]
+            if action in {"observe", "verify"} and not application_kind.startswith("fabric."):
+                # Older pinned Databricks/Snowflake runners accept the receipt-only wire shape.
+                body.pop("spec", None)
             pools = [
                 WorkerPool.model_validate(row)
                 for row in c.scalars(sa.select(m.worker_pools.c.data))
@@ -86,6 +101,7 @@ class ExecutionGateway:
                 for p in pools
                 if p.enabled
                 and action in p.actions
+                and application_kind in p.application_kinds
                 and (target is None or target.connection_id in p.connection_ids)
             ]
             if len(selected) != 1:
@@ -111,6 +127,7 @@ class ExecutionGateway:
             job = ExecutionJob(
                 tenant_id=tenant,
                 operation_id=op["id"],
+                application_kind=application_kind,
                 execution_id=op["execution_id"],
                 operation_fence=op["fence"],
                 pool_id=pool.id,
@@ -184,6 +201,7 @@ class ExecutionGateway:
             or row["fence"] != proof.fence
             or job.image != pool.image
             or job.action not in pool.actions
+            or job.application_kind not in pool.application_kinds
         ):
             raise Forbidden()
         now = c.scalar(sa.select(sa.func.now()))
@@ -272,6 +290,7 @@ class ExecutionGateway:
             if (
                 job.image != pool.image
                 or job.action not in pool.actions
+                or job.application_kind not in pool.application_kinds
                 or job.deadline <= utcnow()
             ):
                 c.execute(
@@ -389,14 +408,107 @@ class ExecutionGateway:
                 accepted = journal.intent(request.step, request.data)
                 response = {"accepted": accepted}
             else:
-                if request.step == "bundle-deploy":
+                if job.application_kind in {
+                    "snowflake.native-app/v1",
+                    "fabric.solution/v1",
+                    "fabric.iq/v1",
+                } and request.step != terminal_step(job.application_kind):
+                    step_receipt = NativeStepReceipt.model_validate(request.data)
+                    fabric = job.application_kind.startswith("fabric.")
+                    if set(step_receipt.handles) - (
+                        {"operation_id", "job_id", "metadata_digest", "definition_digest"}
+                        if fabric
+                        else {"query_id"}
+                    ) or any(
+                        value and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value)
+                        for value in step_receipt.handles.values()
+                    ):
+                        raise ServiceError("INVALID_NATIVE_RECEIPT", 422)
+                    if (
+                        step_receipt.step_key != request.step
+                        or step_receipt.plan_digest != job.request["plan"]["digest"]
+                    ):
+                        raise ServiceError("CHECKPOINT_CONFLICT")
+                    allowed = {s["resource_key"] for s in job.request["plan"]["steps"]}
+                    for binding in step_receipt.resources:
+                        if (
+                            str(binding.application_id) != job.request["artifact"]["application_id"]
+                            or not job.target
+                            or binding.target_id != job.target.id
+                            or binding.key not in allowed
+                            or not binding.resource_type.startswith(
+                                "fabric." if fabric else "snowflake."
+                            )
+                        ):
+                            raise Forbidden()
+                        values = dict(
+                            tenant_id=worker.tenant_id,
+                            application_id=binding.application_id,
+                            target_id=binding.target_id,
+                            key=binding.key,
+                            native_id=binding.native_id,
+                            resource_type=binding.resource_type,
+                            data=binding.model_dump(mode="json"),
+                        )
+                        c.execute(
+                            insert(m.resource_bindings)
+                            .values(**values)
+                            .on_conflict_do_update(
+                                index_elements=["tenant_id", "application_id", "target_id", "key"],
+                                set_={
+                                    "native_id": binding.native_id,
+                                    "resource_type": binding.resource_type,
+                                    "data": values["data"],
+                                },
+                            )
+                        )
+                    deployment = Deployment.model_validate(
+                        r.resource(c, worker.tenant_id, "deployment", job.operation_id)["data"]
+                    )
+                    merged = {b.key: b for b in deployment.resources}
+                    merged.update({b.key: b for b in step_receipt.resources})
+                    r.replace_resource(
+                        c,
+                        worker.tenant_id,
+                        job.operation_id,
+                        deployment.model_copy(update={"resources": list(merged.values())}),
+                    )
+                    if step_receipt.handles.get("query_id"):
+                        r.event(
+                            c,
+                            worker.tenant_id,
+                            job.operation_id,
+                            "native_query_recorded",
+                            {"step": request.step, "query_id": step_receipt.handles["query_id"]},
+                        )
+                    if fabric:
+                        for handle in ("operation_id", "job_id"):
+                            if step_receipt.handles.get(handle):
+                                r.event(
+                                    c,
+                                    worker.tenant_id,
+                                    job.operation_id,
+                                    "native_operation_recorded",
+                                    {"step": request.step, handle: step_receipt.handles[handle]},
+                                )
+                elif request.step == "bundle-deploy":
                     if set(request.data) != {"native_id"} or not re.fullmatch(
                         r"[A-Za-z0-9_.:-]{1,256}", str(request.data["native_id"])
                     ):
                         raise ServiceError("INVALID_NATIVE_RECEIPT", 422)
-                elif request.step == "bundle-run":
+                elif request.step == terminal_step(job.application_kind):
                     receipt = ApplyReceipt.model_validate(request.data)
                     artifact = job.request["artifact"]
+                    if job.application_kind.startswith("fabric."):
+                        try:
+                            validate_fabric_receipt(
+                                receipt,
+                                parse_spec(artifact["spec"]),
+                                job.target,
+                                completed=journal.completed,
+                            )
+                        except ValueError:
+                            raise ServiceError("INVALID_NATIVE_RECEIPT", 422) from None
                     if (
                         receipt.tenant_id != worker.tenant_id
                         or not job.target
@@ -472,7 +584,7 @@ class ExecutionGateway:
                     != c.scalar(
                         sa.select(m.step_journal.c.receipt).where(
                             m.step_journal.c.operation_id == job.operation_id,
-                            m.step_journal.c.key == "bundle-run",
+                            m.step_journal.c.key == terminal_step(job.application_kind),
                             m.step_journal.c.state == "complete",
                         )
                     )

@@ -1,0 +1,9 @@
+{
+  "kind": "snowflake.native-app/v1",
+  "project_root": ".",
+  "package_binding": "package",
+  "application_binding": "application",
+  "warehouse_binding": "warehouse",
+  "release_version": "V1",
+  "release_patch": 0
+}

@@ -35,7 +35,11 @@ export type ShifdeContracts =
   | LeaseRequest
   | CheckpointSubmission
   | JobResultSubmission
-  | CredentialGrant;
+  | CredentialGrant
+  | NativeStepReceipt
+  | InspectRequest
+  | ObserveRequest
+  | VerifyRequest;
 export type CreatedAt = string;
 export type Code = string;
 export type Message = string;
@@ -55,7 +59,11 @@ export type TenantId = string;
 export type Id2 = string;
 export type SourceDigest = string;
 export type Spec =
-  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+  | DatabricksApplicationSpec
+  | FoundryApplicationSpec
+  | SnowflakeApplicationSpec
+  | FabricApplicationSpec
+  | FabricIQApplicationSpec;
 export type AppResourceKey = string;
 export type BundleRoot = string;
 export type BundleTarget = string;
@@ -77,14 +85,256 @@ export type ReleaseVersion = string;
 export type WarehouseBinding1 = string;
 /**
  * @minItems 1
+ * @maxItems 16
  */
-export type Items = [FabricItem, ...FabricItem[]];
+export type Items =
+  | [FabricItem]
+  | [FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ];
 export type DefinitionPath = string;
 export type DependsOn = string[];
-export type ItemType = "Lakehouse" | "Notebook";
+export type ItemType = "Lakehouse" | "Notebook" | "Ontology";
 export type Key = string;
+export type Lakehouse = string | null;
+export type NameBinding = string | null;
 export type Kind3 = "fabric.solution/v1";
 export type SolutionRoot = string;
+export type VerificationNotebook = string | null;
+export type WorkspaceBinding = "workspace";
+/**
+ * @minItems 1
+ * @maxItems 16
+ */
+export type Items1 =
+  | [FabricItem]
+  | [FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem, FabricItem]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ]
+  | [
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem,
+      FabricItem
+    ];
+export type Kind4 = "fabric.iq/v1";
+export type SolutionRoot1 = string;
+export type VerificationNotebook1 = string | null;
+export type WorkspaceBinding1 = "workspace";
 export type SpecDigest = string;
 export type TemplateVersion = string;
 export type TenantId1 = string;
@@ -151,7 +401,11 @@ export type ApplicationId5 = string;
 export type Id6 = string;
 export type Revision = number;
 export type Spec1 =
-  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+  | DatabricksApplicationSpec
+  | FoundryApplicationSpec
+  | SnowflakeApplicationSpec
+  | FabricApplicationSpec
+  | FabricIQApplicationSpec;
 export type TenantId6 = string;
 export type ConnectionId = string;
 export type ConnectionRevision1 = number;
@@ -168,7 +422,8 @@ export type ArtifactId1 = string;
 export type TargetId4 = string;
 export type ArtifactId2 = string;
 export type PlanId = string;
-export type Kind4 = "databricks.app/v1" | "palantir.superrepo/v1" | "snowflake.native-app/v1" | "fabric.solution/v1";
+export type Kind5 =
+  "databricks.app/v1" | "palantir.superrepo/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1";
 export type Name = string;
 export type CredentialRef = string;
 export type Host1 = string;
@@ -181,14 +436,18 @@ export type Revision1 = number;
 export type TenantId8 = string;
 export type ConnectionId1 = string;
 export type Environment1 = string;
-export type Bindings3 = {
+export type Bindings4 = {
   [k: string]: string;
 } | null;
 export type Environment2 = string | null;
 export type ApplicationId6 = string;
 export type SourceId = string;
 export type Spec2 =
-  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+  | DatabricksApplicationSpec
+  | FoundryApplicationSpec
+  | SnowflakeApplicationSpec
+  | FabricApplicationSpec
+  | FabricIQApplicationSpec;
 export type Digest2 = string;
 export type Size1 = number;
 export type Digest3 = string;
@@ -199,7 +458,11 @@ export type TenantId9 = string;
 export type UploadId = string;
 export type ApplicationId7 = string;
 export type Spec3 =
-  DatabricksApplicationSpec | FoundryApplicationSpec | SnowflakeApplicationSpec | FabricApplicationSpec;
+  | DatabricksApplicationSpec
+  | FoundryApplicationSpec
+  | SnowflakeApplicationSpec
+  | FabricApplicationSpec
+  | FabricIQApplicationSpec;
 export type TemplateVersion1 = string;
 export type ApplicationId8 = string;
 export type TargetId5 = string;
@@ -242,6 +505,9 @@ export type Actions = [
     | "verify"
   )[]
 ];
+export type ApplicationKinds = (
+  "databricks.app/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1"
+)[];
 export type ConnectionIds = string[];
 export type Enabled = boolean;
 export type Id10 = string;
@@ -260,6 +526,7 @@ export type Action1 =
   | "observe"
   | "reconcile"
   | "verify";
+export type ApplicationKind = "databricks.app/v1" | "snowflake.native-app/v1" | "fabric.solution/v1" | "fabric.iq/v1";
 export type CredentialRef2 = string | null;
 export type Deadline = string;
 export type ExecutionId = string;
@@ -300,6 +567,38 @@ export type PoolId1 = string;
 export type TargetId6 = string;
 export type TenantId12 = string;
 export type WorkerId = string;
+export type PlanDigest1 = string;
+export type Resources3 = ResourceBinding[];
+export type StepKey = string;
+export type AppName = string;
+export type ApplicationId9 = string;
+export type Spec4 =
+  | (
+      | DatabricksApplicationSpec
+      | FoundryApplicationSpec
+      | SnowflakeApplicationSpec
+      | FabricApplicationSpec
+      | FabricIQApplicationSpec
+    )
+  | null;
+export type Spec5 =
+  | (
+      | DatabricksApplicationSpec
+      | FoundryApplicationSpec
+      | SnowflakeApplicationSpec
+      | FabricApplicationSpec
+      | FabricIQApplicationSpec
+    )
+  | null;
+export type Spec6 =
+  | (
+      | DatabricksApplicationSpec
+      | FoundryApplicationSpec
+      | SnowflakeApplicationSpec
+      | FabricApplicationSpec
+      | FabricIQApplicationSpec
+    )
+  | null;
 
 export interface Operation {
   created_at: CreatedAt;
@@ -368,6 +667,8 @@ export interface FabricApplicationSpec {
   items: Items;
   kind: Kind3;
   solution_root: SolutionRoot;
+  verification_notebook: VerificationNotebook;
+  workspace_binding: WorkspaceBinding;
 }
 export interface Bindings {
   [k: string]: string;
@@ -377,6 +678,19 @@ export interface FabricItem {
   depends_on: DependsOn;
   item_type: ItemType;
   key: Key;
+  lakehouse: Lakehouse;
+  name_binding: NameBinding;
+}
+export interface FabricIQApplicationSpec {
+  bindings: Bindings1;
+  items: Items1;
+  kind: Kind4;
+  solution_root: SolutionRoot1;
+  verification_notebook: VerificationNotebook1;
+  workspace_binding: WorkspaceBinding1;
+}
+export interface Bindings1 {
+  [k: string]: string;
 }
 export interface PlanResult {
   result_kind: ResultKind1;
@@ -472,7 +786,7 @@ export interface Project {
   tenant_id: TenantId6;
 }
 export interface Target {
-  bindings: Bindings1;
+  bindings: Bindings2;
   connection_id: ConnectionId;
   connection_revision: ConnectionRevision1;
   environment: Environment;
@@ -480,7 +794,7 @@ export interface Target {
   id: Id7;
   tenant_id: TenantId7;
 }
-export interface Bindings1 {
+export interface Bindings2 {
   [k: string]: string;
 }
 export interface ErrorEnvelope {
@@ -504,7 +818,7 @@ export interface DeploymentSubmission {
   plan_id: PlanId;
 }
 export interface ApplicationSubmission {
-  kind: Kind4;
+  kind: Kind5;
   name: Name;
 }
 export interface ConnectionSubmission {
@@ -521,15 +835,15 @@ export interface Connection {
   tenant_id: TenantId8;
 }
 export interface TargetSubmission {
-  bindings: Bindings2;
+  bindings: Bindings3;
   connection_id: ConnectionId1;
   environment: Environment1;
 }
-export interface Bindings2 {
+export interface Bindings3 {
   [k: string]: string;
 }
 export interface TargetPatch {
-  bindings: Bindings3;
+  bindings: Bindings4;
   environment: Environment2;
 }
 export interface ProjectSubmission {
@@ -591,6 +905,7 @@ export interface DeploymentView {
 }
 export interface WorkerPool {
   actions: Actions;
+  application_kinds: ApplicationKinds;
   connection_ids: ConnectionIds;
   enabled: Enabled;
   id: Id10;
@@ -601,6 +916,7 @@ export interface WorkerPool {
 }
 export interface ExecutionJob {
   action: Action1;
+  application_kind: ApplicationKind;
   credential_ref: CredentialRef2;
   deadline: Deadline;
   execution_id: ExecutionId;
@@ -667,4 +983,26 @@ export interface CredentialGrant {
   target_id: TargetId6;
   tenant_id: TenantId12;
   worker_id: WorkerId;
+}
+export interface NativeStepReceipt {
+  handles: Handles;
+  plan_digest: PlanDigest1;
+  resources: Resources3;
+  step_key: StepKey;
+}
+export interface Handles {
+  [k: string]: string;
+}
+export interface InspectRequest {
+  app_name: AppName;
+  application_id: ApplicationId9;
+  spec: Spec4;
+}
+export interface ObserveRequest {
+  receipt: ApplyReceipt;
+  spec: Spec5;
+}
+export interface VerifyRequest {
+  receipt: ApplyReceipt;
+  spec: Spec6;
 }

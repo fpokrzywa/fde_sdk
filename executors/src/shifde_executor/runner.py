@@ -114,6 +114,27 @@ class RemoteJournal:
 
 
 def native_adapter(job, rpc):
+    if job.application_kind in {"fabric.solution/v1", "fabric.iq/v1"}:
+        from shifde_fabric.adapter import FabricAdapter, FabricIQAdapter
+        from shifde_fabric.clients import FabricClient
+
+        iq = job.application_kind == "fabric.iq/v1"
+        return (FabricIQAdapter if iq else FabricAdapter)(
+            client_factory=lambda target: FabricClient(
+                target, lambda: rpc.call("credential"), iq=iq
+            )
+        )
+    if job.application_kind == "snowflake.native-app/v1":
+        from shifde_snowflake.adapter import SnowflakeAdapter
+        from shifde_snowflake.clients import SnowflakeClient
+
+        return SnowflakeAdapter(
+            client_factory=lambda target: SnowflakeClient(
+                target,
+                lambda: rpc.call("credential"),
+                query_tag=f"shifde:{job.operation_id}:{job.id}",
+            )
+        )
     if job.target is None:
         return DatabricksAdapter()
 

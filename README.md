@@ -4,7 +4,7 @@ SHIFDE builds platform-specific applications through a shared delivery lifecycle
 
 The Databricks adapter scaffolds a Python app, packages immutable source, plans changes against native state, deploys a bounded app-only bundle, starts the app, and verifies native status plus an authenticated runtime warehouse check. Local steps and ownership survive process restarts. An uncertain native write stops execution for reconciliation.
 
-Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server, then the [executor operating guide](docs/executor-operations.md) to enroll isolated hosted or outbound-only private workers. Each adapter action runs in a fresh container; production requires dedicated tenant VM hosts and signed digest-pinned images. General hostile-code compilation remains a later milestone. Palantir, Snowflake and Fabric have native specification models; their deployment adapters are not implemented.
+Start with the [hosted development guide](docs/hosted-development.md) to run the API, Temporal workers and MCP server, then the [executor operating guide](docs/executor-operations.md) to enroll isolated hosted or outbound-only private workers. Each adapter action runs in a fresh container; production requires dedicated tenant VM hosts and signed digest-pinned images. General hostile-code compilation remains a later milestone. The experimental [Snowflake Native App adapter](docs/snowflake-native-app.md) supports internal packages, versions/patches, installation and in-place upgrades. The experimental [Fabric and Fabric IQ adapters](docs/fabric-adapters.md) deploy Lakehouse, Notebook and Ontology definitions. Palantir remains schema-only.
 
 ## Install and verify
 
@@ -38,6 +38,8 @@ Use uv's `--link-mode copy` for package builds in OneDrive directories that reje
 packages/contracts/             Pydantic models and native specifications
 packages/core/                  adapter protocol, artifacts, plans, policy and local journal/service
 packages/adapters/databricks/   real Databricks SDK/CLI integration and packaged app template
+packages/adapters/snowflake/    Native App package/version/install/upgrade adapter
+packages/adapters/fabric/       Fabric Lakehouse/Notebook and Fabric IQ Ontology adapters
 packages/sdk_python/            validated async HTTP client
 packages/sdk_typescript/        generated types, runtime validation and async HTTP client
 packages/hosted/                PostgreSQL service, authorization, outbox, execution and journals
@@ -53,7 +55,7 @@ infra/                         local PostgreSQL/Temporal development services
 tools/                         contract generation and vendor-schema checks
 ```
 
-The four native kinds are `databricks.app/v1`, `palantir.superrepo/v1`, `snowflake.native-app/v1` and `fabric.solution/v1`. Native schemas remain independent. The shared `PlatformAdapter` protocol exposes capabilities, inspection, scaffolding, validation, building, planning, applying, observing, reconciliation and verification.
+The native kinds are `databricks.app/v1`, `palantir.superrepo/v1`, `snowflake.native-app/v1`, `fabric.solution/v1` and `fabric.iq/v1`. Native schemas remain independent. The shared `PlatformAdapter` protocol exposes capabilities, inspection, scaffolding, validation, building, planning, applying, observing, reconciliation and verification.
 
 ## Run the Databricks workflow
 

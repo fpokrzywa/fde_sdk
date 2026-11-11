@@ -11,5 +11,5 @@ class SnowflakeApplicationSpec(Model):
     package_binding: Identifier
     application_binding: Identifier
     warehouse_binding: Identifier
-    release_version: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
-    release_patch: int = Field(default=0, ge=0)
+    release_version: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_]{0,29}$")
+    release_patch: int = Field(default=0, ge=0, le=129)

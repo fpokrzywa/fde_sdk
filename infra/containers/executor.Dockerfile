@@ -1,5 +1,8 @@
 # Build dependencies are exported with hashes from uv.lock; no application source is baked in.
 FROM python:3.12.16-slim-trixie@sha256:4840d514c583a4d3d8cad3940e68dee6f0f6f3635c12fcd0a3d74c21a5b93a54 AS build
+COPY infra/containers/snowflake-cli.requirements.txt /snowflake-cli.requirements.txt
+RUN python -m venv /opt/snowcli \
+ && /opt/snowcli/bin/pip install --no-cache-dir --require-hashes -r /snowflake-cli.requirements.txt
 COPY .tools/executor-wheels/ /wheels/
 RUN python -m venv /opt/venv \
  && /opt/venv/bin/pip install --no-cache-dir --require-hashes -r /wheels/requirements.txt \
@@ -15,6 +18,7 @@ PY
 
 FROM python:3.12.16-slim-trixie@sha256:4840d514c583a4d3d8cad3940e68dee6f0f6f3635c12fcd0a3d74c21a5b93a54
 COPY --from=build /opt/venv /opt/venv
+COPY --from=build /opt/snowcli /opt/snowcli
 COPY --from=build --chmod=0555 /databricks /usr/local/bin/databricks
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 HOME=/tmp
 USER 10001:10001

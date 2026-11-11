@@ -6,8 +6,9 @@ from typing import Any, cast
 
 from pydantic import TypeAdapter
 from shifde_contracts.builds import BuildArtifact
+from shifde_contracts.checkpoints import NativeStepReceipt
 from shifde_contracts.common import Target
-from shifde_contracts.execution import ApplyReceipt, Deployment
+from shifde_contracts.execution import ApplyReceipt, Deployment, ObserveRequest, VerifyRequest
 from shifde_contracts.hosted import (
     ApplicationSubmission,
     Connection,
@@ -37,7 +38,7 @@ from shifde_contracts.jobs import (
     WorkerPool,
 )
 from shifde_contracts.operations import ErrorEnvelope, Operation
-from shifde_contracts.plans import DeploymentPlan
+from shifde_contracts.plans import DeploymentPlan, InspectRequest
 from shifde_contracts.projects import ApplicationSpec, Project
 from shifde_contracts.submissions import BuildSubmission, DeploymentSubmission, PlanSubmission
 
@@ -83,7 +84,11 @@ def export_contracts(output_dir: Path = ROOT / "schemas") -> None:
             | LeaseRequest
             | CheckpointSubmission
             | JobResultSubmission
-            | CredentialGrant,
+            | CredentialGrant
+            | NativeStepReceipt
+            | InspectRequest
+            | ObserveRequest
+            | VerifyRequest,
             # Hosted resource and operation requests use these same canonical models.
         )
     )
