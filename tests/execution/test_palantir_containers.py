@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -14,6 +13,7 @@ from shifde_executor.receipts import ReceiptOutbox
 from shifde_executor.sandbox import DockerSandbox
 from shifde_hosted.persistence import models as m
 
+from tests.execution.native_http_boundary import BOUNDARY_HOST, BOUNDARY_PORT, native_http_relay
 from tests.execution.test_palantir_hosted import palantir_flow
 from tests.execution.test_palantir_hosted import palantir_hosted as palantir_hosted
 from tests.execution.test_private_worker import outbound_setup as outbound_setup
@@ -74,7 +74,7 @@ def palantir_containers(palantir_hosted, tmp_path):
     shutil.copyfile(
         Path(__file__).with_name("palantir_container_runner.py"), context / "native_test.py"
     )
-    (context / "vendor-url").write_text(f"http://host.docker.internal:{server.server_port}/{nonce}")
+    (context / "vendor-url").write_text(f"http://{BOUNDARY_HOST}:{BOUNDARY_PORT}/{nonce}")
     base_tag, image_tag = "shifde-palantir-test-base:" + nonce, "shifde-palantir-e2e:" + nonce
     network = "shifde-palantir-" + nonce
     try:
@@ -126,13 +126,11 @@ def palantir_containers(palantir_hosted, tmp_path):
         class TestBoundarySandbox(DockerSandbox):
             def command(self, job, name):
                 argv = super().command(job, name)
-                if sys.platform == "linux":
-                    pos = argv.index("--entrypoint")
-                    argv[pos:pos] = ["--add-host", "host.docker.internal:host-gateway"]
                 return [*argv[:-2], "/opt/test/native_test.py"]
 
         supervisor.sandbox = TestBoundarySandbox(settings)
-        yield palantir_hosted
+        with native_http_relay(base, network, server.server_port):
+            yield palantir_hosted
     finally:
         server.shutdown()
         server.server_close()
