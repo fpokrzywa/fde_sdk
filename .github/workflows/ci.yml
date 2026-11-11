@@ -15,3 +15,25 @@ jobs:
       - name: Confirm matrix and runner startup
         shell: bash
         run: printf '%s\n' 'matrix-startup-probe-ok'
+  hosted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      registry:
+        image: registry:3
+        ports:
+          - 5000:5000
+      postgres:
+        image: postgres:17.10
+        env:
+          POSTGRES_PASSWORD: integration-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    steps:
+      - name: Verify hosted service startup
+        run: |
+          docker exec ${{ job.services.postgres.id }} pg_isready -U postgres
+          curl --fail --silent http://127.0.0.1:5000/v2/
