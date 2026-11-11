@@ -185,7 +185,12 @@ def native_container_supervisor(snowflake_hosted, tmp_path, request):
                 return [*argv[:-2], "/opt/test/native_test.py"]
 
         supervisor.sandbox = TestBoundarySandbox(settings)
-        with native_http_relay(base, network, server.server_port):
+        with native_http_relay(
+            base,
+            network,
+            server.server_port,
+            ephemeral_port_range=mode.get("relay_ephemeral_port_range"),
+        ):
             yield snowflake_hosted
     finally:
         server.shutdown()
@@ -228,6 +233,13 @@ async def test_hosted_native_app_create_patch_and_upgrade_in_fresh_containers(
     ]
 
 
+@pytest.mark.parametrize(
+    "native_container_supervisor",
+    # Force the old automatic allocator to reuse an upstream tuple by request 3.
+    # Client-side tuple reuse alone did not cover this second forwarding leg.
+    [{"relay_ephemeral_port_range": (41000, 41001)}],
+    indirect=True,
+)
 def test_fresh_containers_can_reuse_native_http_client_tuple(native_container_supervisor):
     supervisor = native_container_supervisor[2]
     probe = """
@@ -257,7 +269,7 @@ except Exception as exc:
 finally:sock.close()
 """
     responses = []
-    for _ in range(2):
+    for _ in range(4):
         name = "shifde-http-probe-" + uuid4().hex
         try:
             result = subprocess.run(
@@ -288,7 +300,7 @@ finally:sock.close()
             )
             response = json.loads(result.stdout)
             responses.append(response)
-            assert response.get("status") == "HTTP/1.0 200 OK", response
+            assert response.get("status") == "HTTP/1.0 200 OK", responses
         finally:
             subprocess.run(
                 ["docker", "rm", "--force", name],
@@ -296,5 +308,5 @@ finally:sock.close()
                 stderr=subprocess.DEVNULL,
                 timeout=20,
             )
-    assert responses[0]["address"] == responses[1]["address"]
+    assert all(response["address"] == responses[0]["address"] for response in responses)
     assert native_container_supervisor[-2].mutations == []
