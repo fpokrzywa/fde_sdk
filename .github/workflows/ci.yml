@@ -6,16 +6,12 @@ permissions:
   contents: read
 jobs:
   startup:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.3.3
-        with:
-          version: "0.11.15"
-          python-version: "3.12"
-      - uses: actions/setup-node@v7.1.0
-        with:
-          node-version: "24"
-      - name: Confirm action resolution and startup
-        run: printf '%s\n' 'action-startup-probe-ok'
+      - name: Confirm matrix and runner startup
+        shell: bash
+        run: printf '%s\n' 'matrix-startup-probe-ok'
