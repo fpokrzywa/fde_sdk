@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -14,6 +13,7 @@ from shifde_executor.receipts import ReceiptOutbox
 from shifde_executor.sandbox import DockerSandbox
 from shifde_hosted.persistence import models as m
 
+from tests.execution.native_http_boundary import BOUNDARY_HOST, BOUNDARY_PORT, native_http_relay
 from tests.execution.test_fabric_hosted import fabric_flow
 from tests.execution.test_fabric_hosted import fabric_hosted as fabric_hosted
 from tests.execution.test_private_worker import outbound_setup as outbound_setup
@@ -72,7 +72,7 @@ def fabric_containers(fabric_hosted, tmp_path):
     shutil.copyfile(
         Path(__file__).with_name("fabric_container_runner.py"), context / "native_test.py"
     )
-    (context / "vendor-url").write_text(f"http://host.docker.internal:{server.server_port}/{nonce}")
+    (context / "vendor-url").write_text(f"http://{BOUNDARY_HOST}:{BOUNDARY_PORT}/{nonce}")
     base_tag, image_tag = "shifde-fabric-test-base:" + nonce, "shifde-fabric-e2e:" + nonce
     network = "shifde-fabric-" + nonce
     try:
@@ -124,13 +124,11 @@ def fabric_containers(fabric_hosted, tmp_path):
         class TestBoundarySandbox(DockerSandbox):
             def command(self, job, name):
                 argv = super().command(job, name)
-                if sys.platform == "linux":
-                    pos = argv.index("--entrypoint")
-                    argv[pos:pos] = ["--add-host", "host.docker.internal:host-gateway"]
                 return [*argv[:-2], "/opt/test/native_test.py"]
 
         supervisor.sandbox = TestBoundarySandbox(settings)
-        yield fabric_hosted
+        with native_http_relay(base, network, server.server_port):
+            yield fabric_hosted
     finally:
         server.shutdown()
         server.server_close()

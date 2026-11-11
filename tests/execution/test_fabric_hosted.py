@@ -192,8 +192,10 @@ async def fabric_flow(setup, *, execute=None, timeout=60, promote=False):
             f"deploy-{index}",
             deploy=True,
         )
-        assert result["healthy"] and (first is None or result["resources"] == first)
-        first = result["resources"]
+        resources = {resource["key"]: resource for resource in result["resources"]}
+        assert len(resources) == len(result["resources"]) == len(items)
+        assert result["healthy"] and (first is None or resources == first)
+        first = resources
     inspection = await submit(
         "inspections", {"application_id": app["id"], "target_id": str(target.id)}, "inspect"
     )
@@ -216,7 +218,9 @@ async def fabric_flow(setup, *, execute=None, timeout=60, promote=False):
             "promoted-deploy",
             deploy=True,
         )
-        assert result["healthy"] and result["resources"] != first
+        resources = {resource["key"]: resource for resource in result["resources"]}
+        assert len(resources) == len(result["resources"]) == len(items)
+        assert result["healthy"] and resources != first
     return artifact
 
 
@@ -224,6 +228,20 @@ async def fabric_flow(setup, *, execute=None, timeout=60, promote=False):
 async def test_fabric_create_update_and_promote_through_hosted_api(fabric_hosted):
     await fabric_flow(fabric_hosted, promote=True)
     assert len(fabric_hosted[-3].items) == (6 if fabric_hosted[-1] == "fabric.iq/v1" else 4)
+
+
+@pytest.mark.parametrize("fabric_hosted", ["fabric.iq/v1"], indirect=True)
+async def test_fabric_update_preserves_identity_with_reordered_owned_rows(
+    fabric_hosted, monkeypatch
+):
+    executor = fabric_hosted[8]
+    owned = executor._owned
+    monkeypatch.setattr(
+        executor,
+        "_owned",
+        lambda *args: tuple(sorted(owned(*args), key=lambda binding: binding.key, reverse=True)),
+    )
+    await fabric_flow(fabric_hosted)
 
 
 async def test_fabric_lro_failure_keeps_partial_ownership_through_api(fabric_hosted):

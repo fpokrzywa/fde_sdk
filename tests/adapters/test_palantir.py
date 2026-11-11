@@ -34,12 +34,16 @@ async def test_palantir_marketplace_build_is_offline_and_pins_version(tmp_path):
     assert artifact.archive.digest == source.digest and artifact.spec.version_id == spec.version_id
 
 
-async def test_superrepo_stays_explicitly_gated():
+@pytest.mark.parametrize(
+    "operation",
+    ["scaffold", "validate", "build", "inspect", "plan", "apply", "observe", "verify", "reconcile"],
+)
+async def test_superrepo_stays_explicitly_gated(operation):
     from shifde_contracts.platform_specs.palantir import FoundryApplicationSpec
     from shifde_palantir.adapter import PalantirSuperRepoAdapter, SuperRepoPrerequisite
 
     with pytest.raises(SuperRepoPrerequisite, match="enrollment"):
-        await PalantirSuperRepoAdapter().scaffold(
+        await getattr(PalantirSuperRepoAdapter(), operation)(
             ScaffoldRequest(
                 spec=FoundryApplicationSpec(
                     ontology_binding="ontology",
@@ -49,6 +53,15 @@ async def test_superrepo_stays_explicitly_gated():
             ),
             None,
         )
+
+
+async def test_superrepo_capabilities_report_enrollment_and_cli_prerequisites():
+    from shifde_palantir.adapter import PalantirSuperRepoAdapter
+
+    report = await PalantirSuperRepoAdapter().capabilities(None)
+    deployment = next(c for c in report.capabilities if c.operation == "deployment")
+    assert deployment.status == "unsupported"
+    assert "enrollment" in deployment.reason and "CLI" in deployment.reason
 
 
 @pytest.fixture

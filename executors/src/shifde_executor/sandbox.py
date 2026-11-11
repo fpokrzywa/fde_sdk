@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import threading
+import time
 from uuid import uuid4
 
 from shifde_contracts.common import utcnow
@@ -118,6 +119,7 @@ class DockerSandbox:
         seconds = min(self.settings.max_job_seconds, (job.deadline - utcnow()).total_seconds())
         if seconds <= 0:
             raise TimeoutError("job deadline expired")
+        until = time.monotonic() + seconds
         process = subprocess.Popen(
             self.command(job, name),
             stdin=subprocess.PIPE,
@@ -132,9 +134,6 @@ class DockerSandbox:
         done = threading.Event()
 
         def monitor():
-            import time
-
-            until = time.monotonic() + seconds
             while not done.wait(0.1):
                 if time.monotonic() >= until or stop is not None and stop.is_set():
                     self._remove(name)
@@ -154,7 +153,15 @@ class DockerSandbox:
                 message = json.loads(line)
                 if "result" in message:
                     process.stdin.close()
-                    process.wait(timeout=10)
+                    # A result can precede Docker's attached-process exit. Both
+                    # phases share the job budget; there is no shorter exit SLA.
+                    remaining = until - time.monotonic()
+                    if remaining <= 0:
+                        raise TimeoutError("sandbox job deadline expired")
+                    try:
+                        process.wait(timeout=remaining)
+                    except subprocess.TimeoutExpired:
+                        raise TimeoutError("sandbox job deadline expired") from None
                     if process.returncode:
                         raise RuntimeError("sandbox failed")
                     return message["result"]
